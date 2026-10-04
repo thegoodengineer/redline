@@ -1,0 +1,152 @@
+{
+  "model": "gemma-4-31b-it",
+  "date": "2026-10-04T08:12:59.377Z",
+  "prompts": 10,
+  "ercCleanFirst": 10,
+  "ercCleanAfterFix": 10,
+  "ercAndRulesCleanFirst": 10,
+  "ercAndRulesCleanAfterFix": 10,
+  "apiErrors": 0,
+  "rows": [
+    {
+      "prompt": "5 V in on a 2-pin connector, an AMS1117-3.3 regulator with input and output capacitors, 3.3 V out on a 2-pin connector.",
+      "session": "eval-mutj3zfn-1",
+      "first": {
+        "drafted": true,
+        "ercErrors": 0,
+        "ercWarnings": 0,
+        "ruleFailures": 0,
+        "tokens": 1593,
+        "ms": 73392,
+        "validationRetry": false
+      },
+      "fixRound": null
+    },
+    {
+      "prompt": "A green power LED with a series resistor, powered from 5 V on a 2-pin connector.",
+      "session": "eval-mutj3zfn-2",
+      "first": {
+        "drafted": true,
+        "ercErrors": 0,
+        "ercWarnings": 0,
+        "ruleFailures": 0,
+        "tokens": 1403,
+        "ms": 110528,
+        "validationRetry": false
+      },
+      "fixRound": null
+    },
+    {
+      "prompt": "A push button with a 10k pull-down resistor, powered from 3.3 V, with the button signal and ground on a 2-pin connector.",
+      "session": "eval-mutj3zfn-3",
+      "first": {
+        "drafted": true,
+        "ercErrors": 0,
+        "ercWarnings": 0,
+        "ruleFailures": 0,
+        "tokens": 1337,
+        "ms": 72858,
+        "validationRetry": false
+      },
+      "fixRound": null
+    },
+    {
+      "prompt": "5 V in on a 2-pin connector, through a polyfuse and a Schottky diode for reverse protection, out to a second 2-pin connector.",
+      "session": "eval-mutj3zfn-4",
+      "first": {
+        "drafted": true,
+        "ercErrors": 0,
+        "ercWarnings": 0,
+        "ruleFailures": 0,
+        "tokens": 1514,
+        "ms": 47124,
+        "validationRetry": false
+      },
+      "fixRound": null
+    },
+    {
+      "prompt": "A 5 V to 3.3 V AMS1117 regulator board with a power LED on the 3.3 V output. Power comes in on a 2-pin connector.",
+      "session": "eval-mutj3zfn-5",
+      "first": {
+        "drafted": true,
+        "ercErrors": 0,
+        "ercWarnings": 0,
+        "ruleFailures": 0,
+        "tokens": 1674,
+        "ms": 49017,
+        "validationRetry": false
+      },
+      "fixRound": null
+    },
+    {
+      "prompt": "5 V in on a 2-pin connector with a polyfuse, then an AMS1117-3.3 regulator, with one LED on the 5 V rail and one LED on the 3.3 V rail.",
+      "session": "eval-mutj3zfn-6",
+      "first": {
+        "drafted": true,
+        "ercErrors": 0,
+        "ercWarnings": 0,
+        "ruleFailures": 0,
+        "tokens": 1928,
+        "ms": 87813,
+        "validationRetry": false
+      },
+      "fixRound": null
+    },
+    {
+      "prompt": "Two indicator LEDs on a 5 V supply from a 2-pin connector, each with its own series resistor.",
+      "session": "eval-mutj3zfn-7",
+      "first": {
+        "drafted": true,
+        "ercErrors": 0,
+        "ercWarnings": 0,
+        "ruleFailures": 0,
+        "tokens": 1561,
+        "ms": 30028,
+        "validationRetry": false
+      },
+      "fixRound": null
+    },
+    {
+      "prompt": "An RC low-pass filter: signal in on a 2-pin connector, a series resistor, a capacitor to ground, signal out on a 2-pin connector.",
+      "session": "eval-mutj3zfn-8",
+      "first": {
+        "drafted": true,
+        "ercErrors": 0,
+        "ercWarnings": 0,
+        "ruleFailures": 0,
+        "tokens": 1491,
+        "ms": 29993,
+        "validationRetry": false
+      },
+      "fixRound": null
+    },
+    {
+      "prompt": "A voltage divider from 5 V using two resistors, with a capacitor across the lower resistor and the divided voltage on a 2-pin connector.",
+      "session": "eval-mutj3zfn-9",
+      "first": {
+        "drafted": true,
+        "ercErrors": 0,
+        "ercWarnings": 0,
+        "ruleFailures": 0,
+        "tokens": 1474,
+        "ms": 35853,
+        "validationRetry": false
+      },
+      "fixRound": null
+    },
+    {
+      "prompt": "A push button that lights an LED while pressed: 5 V from a 2-pin connector, button, series resistor, LED, ground.",
+      "session": "eval-mutj3zfn-10",
+      "first": {
+        "drafted": true,
+        "ercErrors": 0,
+        "ercWarnings": 0,
+        "ruleFailures": 0,
+        "tokens": 1501,
+        "ms": 39232,
+        "validationRetry": false
+      },
+      "fixRound": null
+    }
+  ]
+}

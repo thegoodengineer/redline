@@ -1,0 +1,94 @@
+{
+  "version": 1,
+  "title": "5V to 3.3V Regulator with Indicator",
+  "parts": [
+    {
+      "ref": "J1",
+      "libId": "Connector_Generic:Conn_01x02",
+      "value": "5V_IN",
+      "group": "input"
+    },
+    {
+      "ref": "C1",
+      "libId": "Device:C_Polarized",
+      "value": "10uF",
+      "group": "input"
+    },
+    {
+      "ref": "U1",
+      "libId": "Regulator_Linear:AMS1117-3.3",
+      "value": "3.3V",
+      "group": "regulator"
+    },
+    {
+      "ref": "C2",
+      "libId": "Device:C_Polarized",
+      "value": "22uF",
+      "group": "regulator"
+    },
+    {
+      "ref": "J2",
+      "libId": "Connector_Generic:Conn_01x02",
+      "value": "3V3_OUT",
+      "group": "output"
+    },
+    {
+      "ref": "R1",
+      "libId": "Device:R",
+      "value": "330",
+      "group": "indicator"
+    },
+    {
+      "ref": "D1",
+      "libId": "Device:LED",
+      "value": "GREEN",
+      "group": "indicator"
+    }
+  ],
+  "nets": [
+    {
+      "name": "+5V",
+      "pins": [
+        "J1.1",
+        "U1.3",
+        "C1.1"
+      ]
+    },
+    {
+      "name": "GND",
+      "pins": [
+        "J1.2",
+        "C1.2",
+        "U1.1",
+        "C2.2",
+        "J2.2",
+        "D1.1"
+      ]
+    },
+    {
+      "name": "+3V3",
+      "pins": [
+        "U1.2",
+        "C2.1",
+        "J2.1",
+        "R1.1"
+      ]
+    },
+    {
+      "name": "LED_A",
+      "pins": [
+        "R1.2",
+        "D1.2"
+      ]
+    }
+  ],
+  "noConnect": [],
+  "hints": {
+    "groupOrder": [
+      "input",
+      "regulator",
+      "output",
+      "indicator"
+    ]
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "title": "Protected 5 V input with power LED and button",
+  "comment": "Written by hand to exercise labels, a no-connect pin and every two-terminal part in the catalogue.",
+  "parts": [
+    { "ref": "J1", "libId": "Connector_Generic:Conn_01x02", "value": "5V_IN", "group": "input" },
+    { "ref": "F1", "libId": "Device:Polyfuse", "value": "500mA", "group": "protect" },
+    { "ref": "D1", "libId": "Device:D_Schottky", "value": "SS14", "group": "protect" },
+    { "ref": "R1", "libId": "Device:R", "value": "1k", "group": "led" },
+    { "ref": "D2", "libId": "Device:LED", "value": "GREEN", "group": "led" },
+    { "ref": "SW1", "libId": "Switch:SW_Push", "value": "BTN", "group": "button" },
+    { "ref": "R2", "libId": "Device:R", "value": "10k", "group": "button" },
+    { "ref": "J2", "libId": "Connector_Generic:Conn_01x02", "value": "BTN_OUT", "group": "output" }
+  ],
+  "nets": [
+    { "name": "VIN", "pins": ["J1.1", "F1.1"] },
+    { "name": "VFUSED", "pins": ["F1.2", "D1.2"] },
+    { "name": "+5V", "pins": ["D1.1", "R1.1", "SW1.1"] },
+    { "name": "LED_A", "pins": ["R1.2", "D2.2"] },
+    { "name": "BTN", "pins": ["SW1.2", "R2.1", "J2.1"] },
+    { "name": "GND", "pins": ["J1.2", "D2.1", "R2.2"] }
+  ],
+  "noConnect": ["J2.2"],
+  "hints": { "groupOrder": ["input", "protect", "led", "button", "output"] }
+}

@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "title": "5 V to 3.3 V regulator",
+  "comment": "Written by hand. AMS1117 datasheet (Advanced Monolithic Systems, http://www.advanced-monolithic.com/pdf/ds1117.pdf), Application Hints, Stability, p. 4: 22 uF solid tantalum on the output ensures stability for all operating conditions, so C2 = 22uF polarized. The datasheet gives no value for an input capacitor; C1 = 10uF is our choice for input bypass, not a datasheet figure. Pin numbers (1 GND, 2 VO, 3 VI) are from the same datasheet and match the KiCad symbol.",
+  "parts": [
+    { "ref": "J1", "libId": "Connector_Generic:Conn_01x02", "value": "5V_IN", "group": "input" },
+    { "ref": "C1", "libId": "Device:C_Polarized", "value": "10uF", "group": "input" },
+    { "ref": "U1", "libId": "Regulator_Linear:AMS1117-3.3", "value": "AMS1117-3.3", "group": "regulator" },
+    { "ref": "C2", "libId": "Device:C_Polarized", "value": "22uF", "group": "output" },
+    { "ref": "J2", "libId": "Connector_Generic:Conn_01x02", "value": "3V3_OUT", "group": "output" }
+  ],
+  "nets": [
+    { "name": "+5V", "pins": ["J1.1", "C1.1", "U1.3"] },
+    { "name": "+3V3", "pins": ["U1.2", "C2.1", "J2.1"] },
+    { "name": "GND", "pins": ["J1.2", "C1.2", "U1.1", "C2.2", "J2.2"] }
+  ],
+  "noConnect": [],
+  "hints": { "groupOrder": ["input", "regulator", "output"] }
+}

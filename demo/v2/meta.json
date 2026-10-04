@@ -1,0 +1,103 @@
+{
+  "session": "live",
+  "version": 2,
+  "kind": "revise",
+  "request": "Remove capacitor C2. Add a polyfuse between the input connector and the regulator input.",
+  "model": "gemma-4-31b-it",
+  "attempts": 1,
+  "usage": {
+    "promptTokens": 1421,
+    "outputTokens": 484,
+    "thoughtTokens": 0,
+    "totalTokens": 1905
+  },
+  "ms": 36068,
+  "bytes": {
+    "intent": 1593,
+    "schematic": 58642
+  },
+  "erc": {
+    "errors": 0,
+    "warnings": 0,
+    "kicadVersion": "10.0.4"
+  },
+  "checks": [
+    {
+      "id": "erc-clean",
+      "source": "erc",
+      "status": "pass",
+      "type": "erc",
+      "message": "ERC: 0 violations",
+      "refs": []
+    },
+    {
+      "id": "rule-1",
+      "source": "rule",
+      "status": "fail",
+      "type": "reg_input_cap",
+      "message": "U1 has no capacitor from its input (VIN) to GND",
+      "refs": [
+        "U1"
+      ]
+    },
+    {
+      "id": "rule-2",
+      "source": "rule",
+      "status": "fail",
+      "type": "reg_output_cap",
+      "message": "U1 has no capacitor from its output (+3V3) to GND",
+      "refs": [
+        "U1"
+      ]
+    },
+    {
+      "id": "rule-3",
+      "source": "rule",
+      "status": "pass",
+      "type": "reg_rails_differ",
+      "message": "U1 input VIN and output +3V3 are different nets",
+      "refs": [
+        "U1"
+      ]
+    },
+    {
+      "id": "rule-4",
+      "source": "rule",
+      "status": "pass",
+      "type": "led_series_resistor",
+      "message": "D1 is in series with R1",
+      "refs": [
+        "D1",
+        "R1"
+      ]
+    }
+  ],
+  "diff": {
+    "added": [
+      "F1"
+    ],
+    "removed": [
+      "C2"
+    ],
+    "changed": [
+      {
+        "ref": "U1",
+        "what": [
+          "pin 3 now on VIN"
+        ]
+      }
+    ],
+    "nets": {
+      "added": [
+        "VIN"
+      ],
+      "removed": [],
+      "changed": [
+        "+5V",
+        "GND",
+        "+3V3"
+      ]
+    },
+    "same": false
+  }
+}

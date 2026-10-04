@@ -1,0 +1,95 @@
+{
+  "session": "live",
+  "version": 3,
+  "kind": "revise",
+  "request": "Fix these findings with the smallest change:\n1. [design rule reg_input_cap] U1 has no capacitor from its input (VIN) to GND\n2. [design rule reg_output_cap] U1 has no capacitor from its output (+3V3) to GND",
+  "model": "gemma-4-31b-it",
+  "attempts": 1,
+  "usage": {
+    "promptTokens": 1466,
+    "outputTokens": 582,
+    "thoughtTokens": 0,
+    "totalTokens": 2048
+  },
+  "ms": 46213,
+  "bytes": {
+    "intent": 1895,
+    "schematic": 66065
+  },
+  "erc": {
+    "errors": 0,
+    "warnings": 0,
+    "kicadVersion": "10.0.4"
+  },
+  "checks": [
+    {
+      "id": "erc-clean",
+      "source": "erc",
+      "status": "pass",
+      "type": "erc",
+      "message": "ERC: 0 violations",
+      "refs": []
+    },
+    {
+      "id": "rule-1",
+      "source": "rule",
+      "status": "pass",
+      "type": "reg_input_cap",
+      "message": "U1 input (VIN) has C2 to GND",
+      "refs": [
+        "U1",
+        "C2"
+      ]
+    },
+    {
+      "id": "rule-2",
+      "source": "rule",
+      "status": "pass",
+      "type": "reg_output_cap",
+      "message": "U1 output (+3V3) has C3 to GND",
+      "refs": [
+        "U1",
+        "C3"
+      ]
+    },
+    {
+      "id": "rule-3",
+      "source": "rule",
+      "status": "pass",
+      "type": "reg_rails_differ",
+      "message": "U1 input VIN and output +3V3 are different nets",
+      "refs": [
+        "U1"
+      ]
+    },
+    {
+      "id": "rule-4",
+      "source": "rule",
+      "status": "pass",
+      "type": "led_series_resistor",
+      "message": "D1 is in series with R1",
+      "refs": [
+        "D1",
+        "R1"
+      ]
+    }
+  ],
+  "diff": {
+    "added": [
+      "C2",
+      "C3"
+    ],
+    "removed": [],
+    "changed": [],
+    "nets": {
+      "added": [],
+      "removed": [],
+      "changed": [
+        "VIN",
+        "GND",
+        "+3V3"
+      ]
+    },
+    "same": false
+  }
+}

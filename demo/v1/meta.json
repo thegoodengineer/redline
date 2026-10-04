@@ -1,0 +1,77 @@
+{
+  "session": "live",
+  "version": 1,
+  "kind": "generate",
+  "request": "5 V in on a 2-pin connector, an AMS1117-3.3 regulator, 3.3 V out on a 2-pin connector, and a green power LED on the 3.3 V rail.",
+  "model": "gemma-4-31b-it",
+  "attempts": 1,
+  "usage": {
+    "promptTokens": 1079,
+    "outputTokens": 507,
+    "thoughtTokens": 1081,
+    "totalTokens": 2667
+  },
+  "ms": 69224,
+  "bytes": {
+    "intent": 1542,
+    "schematic": 56573
+  },
+  "erc": {
+    "errors": 0,
+    "warnings": 0,
+    "kicadVersion": "10.0.4"
+  },
+  "checks": [
+    {
+      "id": "erc-clean",
+      "source": "erc",
+      "status": "pass",
+      "type": "erc",
+      "message": "ERC: 0 violations",
+      "refs": []
+    },
+    {
+      "id": "rule-1",
+      "source": "rule",
+      "status": "pass",
+      "type": "reg_input_cap",
+      "message": "U1 input (+5V) has C1 to GND",
+      "refs": [
+        "U1",
+        "C1"
+      ]
+    },
+    {
+      "id": "rule-2",
+      "source": "rule",
+      "status": "pass",
+      "type": "reg_output_cap",
+      "message": "U1 output (+3V3) has C2 to GND",
+      "refs": [
+        "U1",
+        "C2"
+      ]
+    },
+    {
+      "id": "rule-3",
+      "source": "rule",
+      "status": "pass",
+      "type": "reg_rails_differ",
+      "message": "U1 input +5V and output +3V3 are different nets",
+      "refs": [
+        "U1"
+      ]
+    },
+    {
+      "id": "rule-4",
+      "source": "rule",
+      "status": "pass",
+      "type": "led_series_resistor",
+      "message": "D1 is in series with R1",
+      "refs": [
+        "D1",
+        "R1"
+      ]
+    }
+  ]
+}
