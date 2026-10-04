@@ -30,7 +30,8 @@ flowchart LR
 1. **Intent.** Gemma 4 returns a small JSON object: parts (`ref`, `libId`, `value`, `group`), nets (lists of pins
    such as `U1.3`), and no-connect pins. It contains no coordinates. It is checked with zod and by a validator
    (unknown symbol, unknown pin, duplicate ref, pin in two nets, pin in no net). If validation fails the model gets
-   the numbered findings and one retry; nothing is written on failure.
+   the numbered findings and one retry. Problems that code can settle are then repaired and flagged (see "Draft it
+   and flag it"); otherwise nothing is written.
 2. **Engine** (`lib/engine/`, deterministic, no model, unit tested).
    - `sexp`: own s-expression parser and writer.
    - `symbols`: reads symbol definitions and pin positions from the installed `.kicad_sym` libraries and resolves
@@ -179,15 +180,29 @@ npx tsx scripts/eval.ts
 
 ## Harder prompts
 
-`scripts/stress.ts` sends three larger requests through the live model. Two had finished when this was written:
+`scripts/stress.ts` sends three larger requests through the live model:
 
 | Request | Result |
 | --- | --- |
 | ESP32-WROOM-32 board with USB-C power, AMS1117, reset and boot buttons, LED, UART header | 11 parts, 0 ERC errors, 0 warnings, one validation retry, 162 s. It used a plain 2-pin connector where a USB-C connector was asked for. |
 | 12 V dual-rail supply with fuse, diode, LM7805, AMS1117-3.3, LEDs and a header | 14 parts, 0 ERC errors, 0 warnings, 82 s. It used an AMS1117-5.0 where an LM7805 was asked for. |
 
-So larger designs come out valid, but the model sometimes substitutes a part without saying so. That is exactly
-the kind of thing the engineer corrects in chat ("use an LM7805 for U1"), and the edit shows up as a one-line diff.
+| ATmega328P board with crystal, reset, decoupling, ISP and UART headers, LED | First run: rejected after two attempts, nothing drawn (17 unused pins not listed, one pin on two nets). After the draft-and-flag change below: 13 parts, 0 ERC errors, 1 warning, two auto-repairs shown as warnings. The draft still has real mistakes: a decoupling capacitor left on its own net, and SCK and MOSI on the wrong port pins. |
+
+So larger designs come out valid as files, but the model substitutes parts and makes wiring mistakes. That is the
+kind of thing the engineer corrects in chat ("use an LM7805 for U1"), and the edit shows up as a one-line diff.
+
+### Draft it and flag it
+
+Redline used to refuse to draw when the model's answer broke a structural rule twice. Now `lib/engine/repair.ts`
+settles what code can settle and draws the sheet, listing each repair as a warning in the checks panel:
+
+- a pin the model never mentioned is marked no-connect (applied at once, with no second model call);
+- a pin put on two nets stays on the first;
+- a pin or part that does not exist is dropped from the net.
+
+It still refuses when nothing drawable was returned: a symbol that does not exist, a multi-unit symbol, or a reply
+that is not JSON.
 
 ## Limits
 

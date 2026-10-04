@@ -17,7 +17,9 @@ async function main() {
     if (!run.ok) throw new Error(`v${v} no longer validates: ${run.findings.map((f) => f.message).join("; ")}`);
     meta.bytes = run.bytes;
     meta.erc = { errors: run.erc.errors, warnings: run.erc.warnings, kicadVersion: run.erc.kicadVersion };
-    meta.checks = buildChecks(run.erc, run.layout, checkRules(run.intent, symbolLibrary()));
+    // keep the auto-repair notes recorded when the version was first drafted
+    const kept = meta.checks.filter((c) => c.type === "auto_repair").map((c) => ({ message: c.message.replace(/^Auto-repaired: /, ""), refs: c.refs }));
+    meta.checks = buildChecks(run.erc, run.layout, checkRules(run.intent, symbolLibrary()), kept);
     writeFileSync(metaPath, JSON.stringify(meta, null, 2) + "\n");
     console.log(`${session} v${v}: ERC ${run.erc.errors} errors, ${run.erc.warnings} warnings, ${meta.checks.filter((c) => c.status !== "pass").length} failing checks`);
   }

@@ -53,12 +53,49 @@ describe("model calls", () => {
   it("retries once with the numbered findings, and sums usage", async () => {
     const bad = clone(good);
     bad.nets[2].pins = bad.nets[2].pins.filter((x) => x !== "J2.2");
+    bad.nets[1].pins.push("J1.1"); // a pin on two nets needs the model's judgement, so it gets a retry
     const p = scripted([JSON.stringify(bad), JSON.stringify(good)]);
     const r = await generateIntent(p, lib, "5 V to 3.3 V");
     expect(r.ok).toBe(true);
     expect(r.attempts).toBe(2);
     expect(r.usage.totalTokens).toBe(320);
-    expect(p.prompts[1]).toContain("1. J2.2 is in no net and not in noConnect");
+    expect(p.prompts[1]).toContain("J2.2 is in no net and not in noConnect");
+    expect(p.prompts[1]).toContain("J1.1 is in both +5V and +3V3");
+  });
+
+  it("drafts and flags instead of refusing when code can settle the problems", async () => {
+    // unused pin: repaired at once, with no second model call
+    const unused = clone(good);
+    unused.nets[2].pins = unused.nets[2].pins.filter((x) => x !== "J2.2");
+    const p1 = scripted([JSON.stringify(unused)]);
+    const r1 = await generateIntent(p1, lib, "5 V to 3.3 V");
+    expect(r1.ok).toBe(true);
+    expect(r1.attempts).toBe(1);
+    expect(r1.intent!.noConnect).toEqual(["J2.2"]);
+    expect(r1.repairs!.map((r) => r.message)).toEqual(["J2: 1 pin the model did not mention was marked no-connect (2)"]);
+
+    // a pin on two nets: the model gets its retry first, then code keeps the first net
+    const twice = clone(good);
+    twice.nets[1].pins.push("J1.1", "Q9.1", "U1.7");
+    const p2 = scripted([JSON.stringify(twice), JSON.stringify(twice)]);
+    const r2 = await generateIntent(p2, lib, "5 V to 3.3 V");
+    expect(r2.ok).toBe(true);
+    expect(r2.attempts).toBe(2);
+    expect(r2.intent!.nets.find((n) => n.name === "+3V3")!.pins).toEqual(good.nets[1].pins);
+    expect(r2.repairs!.map((r) => r.message)).toEqual([
+      "J1.1 was on both +5V and +3V3; it was kept on +5V",
+      "Q9.1 was dropped from +3V3: there is no part Q9",
+      "U1.7 was dropped from +3V3: U1 has no pin 7",
+    ]);
+  });
+
+  it("still refuses a symbol that does not exist", async () => {
+    const bad = clone(good);
+    bad.parts[2].libId = "Regulator_Linear:NoSuchRegulator";
+    const p = scripted([JSON.stringify(bad), JSON.stringify(bad)]);
+    const r = await generateIntent(p, lib, "anything");
+    expect(r.ok).toBe(false);
+    expect(r.findings[0].code).toBe("unknown_libid");
   });
 
   it("gives up after one retry and returns the findings", async () => {

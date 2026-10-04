@@ -7,6 +7,7 @@ import { ErcReport } from "./kicad/cli";
 import { generateIntent, IntentCall, reviseIntent } from "./model/calls";
 import { ModelProvider, ModelUsage } from "./model/provider";
 import { checkRules, RuleResult } from "./rules";
+import type { Repair } from "./engine/repair";
 import { libraryIndex, RUNS_DIR, runDraft, symbolLibrary } from "./runs";
 
 export interface Check {
@@ -65,8 +66,12 @@ export function loadIntent(session: string, version: number): Intent {
 }
 
 /** ERC violations and design rules as one list. Refs come from layout.json's UUID map. */
-export function buildChecks(erc: ErcReport, layout: Layout, rules: RuleResult[]): Check[] {
+export function buildChecks(erc: ErcReport, layout: Layout, rules: RuleResult[], repairs: Repair[] = []): Check[] {
   const checks: Check[] = [];
+  // What code changed in the model's answer to make it drawable comes first: the engineer should review it.
+  repairs.forEach((r, i) => {
+    checks.push({ id: `repair-${i + 1}`, source: "rule", status: "warn", type: "auto_repair", message: `Auto-repaired: ${r.message}`, refs: r.refs });
+  });
   erc.violations.forEach((v, i) => {
     const refs = [...new Set(v.items.map((item) => layout.uuids[item.uuid]?.ref).filter((r): r is string => !!r))];
     const where = v.items.map((item) => {
@@ -103,7 +108,7 @@ async function commit(
   kind: VersionMeta["kind"],
   request: string,
   model: string,
-  call: Pick<IntentCall, "attempts" | "usage" | "ms" | "ops"> & { intent: Intent },
+  call: Pick<IntentCall, "attempts" | "usage" | "ms" | "ops" | "repairs"> & { intent: Intent },
   previous?: Intent,
 ): Promise<Turn> {
   const version = (listVersions(session).at(-1) ?? 0) + 1;
@@ -121,7 +126,7 @@ async function commit(
     ms: call.ms,
     bytes: run.bytes,
     erc: { errors: run.erc.errors, warnings: run.erc.warnings, kicadVersion: run.erc.kicadVersion },
-    checks: buildChecks(run.erc, run.layout, checkRules(run.intent, symbolLibrary())),
+    checks: buildChecks(run.erc, run.layout, checkRules(run.intent, symbolLibrary()), call.repairs),
     diff: previous ? diffIntent(previous, run.intent) : undefined,
   };
   writeFileSync(join(run.dir, "meta.json"), JSON.stringify(meta, null, 2) + "\n");

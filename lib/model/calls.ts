@@ -3,6 +3,7 @@ import { catalogueText, Finding, Intent, SymbolLibrary } from "../engine";
 import { isCataloguePart } from "../engine/catalogue";
 import type { LibraryIndex } from "../engine/library-index";
 import { applyOps, OPS_HELP, OpsSchema } from "../ops";
+import { repair, Repair } from "../engine/repair";
 import { validate } from "../engine/validate";
 import { addUsage, ModelProvider, ModelUsage, NO_USAGE } from "./provider";
 
@@ -73,6 +74,8 @@ export interface IntentCall {
   attempts: number;
   /** For a revision: how many edit operations the model returned (undefined if it sent a whole intent). */
   ops?: number;
+  /** Structural problems that code settled so the sheet could be drawn. Shown to the engineer as warnings. */
+  repairs?: Repair[];
   usage: ModelUsage;
   ms: number;
 }
@@ -116,6 +119,13 @@ async function callForIntent(provider: ModelProvider, lib: SymbolLibrary, user: 
       const v = validate(candidate, lib, index);
       if (v.ok) return { ok: true, intent: v.intent, findings: [], attempts: attempt, ops, usage, ms };
       findings = v.findings;
+      // Draft it and flag it: unused pins need no second model call, and after the retry anything
+      // code can settle is settled rather than refusing to draw.
+      const onlyUnusedPins = findings.every((f) => f.code === "pin_unassigned");
+      if (onlyUnusedPins || attempt === 2) {
+        const fixed = repair(candidate, lib);
+        if (fixed) return { ok: true, intent: fixed.intent, findings: [], attempts: attempt, ops, repairs: fixed.repairs, usage, ms };
+      }
     }
     prompt = `${user}
 

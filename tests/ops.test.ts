@@ -86,12 +86,13 @@ describe("edit operations", () => {
   });
 
   it("revise retries when the edited design does not validate, and still accepts a whole intent", async () => {
-    const incomplete = ADD_LED.slice(0, 4); // D1.1 left unconnected
+    // D1.1 left unconnected and R1.1 put on a second net: needs the model, so it gets a retry
+    const incomplete: Op[] = [...ADD_LED.slice(0, 4), { op: "add_part", ref: "R1", libId: "Device:R", value: "1k", group: "output" }];
     const p = scripted([JSON.stringify({ ops: incomplete }), JSON.stringify(applyOps(base, ADD_LED))]);
     const r = await reviseIntent(p, lib, base, "add a power LED on 3.3 V");
     expect(r.ok).toBe(true);
     expect(r.attempts).toBe(2);
     expect(r.ops).toBeUndefined();
-    expect(p.prompts[1]).toContain("D1.1 is in no net and not in noConnect");
+    expect(p.prompts[1]).toContain("ref R1 already exists");
   });
 });
