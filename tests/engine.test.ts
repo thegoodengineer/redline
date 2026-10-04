@@ -85,6 +85,8 @@ describe("draft", () => {
     ["reg-3v3", "wires"],
     ["led-button", "wires"],
     ["mic5317-3v3", "wires"],
+    ["ne555-blinker", "wires"],
+    ["atmega328p-minimal", "labels"],
   ] as const) {
     const r = draft(load(name), lib, { wiring });
     if (!r.ok) throw new Error(`${name} did not validate`);
@@ -175,7 +177,7 @@ describe("draft", () => {
   });
 
   it("wires mode: wires of different nets never share a point except at plain crossings", () => {
-    for (const name of ["reg-3v3", "led-button", "mic5317-3v3"]) {
+    for (const name of ["reg-3v3", "led-button", "mic5317-3v3", "ne555-blinker"]) {
       const r = draft(load(name), lib);
       if (!r.ok) throw new Error("did not validate");
       const ends = new Map<string, Set<string>>();

@@ -16,3 +16,4 @@ export async function GET(_: Request, ctx: { params: Promise<{ version: string }
     },
   });
 }
+

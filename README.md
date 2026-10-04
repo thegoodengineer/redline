@@ -48,22 +48,40 @@ flowchart LR
    shows KiCad's own SVG. ERC findings are mapped back to parts through the UUIDs in `layout.json`.
 4. **Design rules** (`lib/rules.ts`, code): a regulator has a capacitor from input to ground and from output to
    ground; every LED has a series resistor; a regulator's input and output are different nets.
-5. **Revise.** A chat message or a finding plus the current intent goes back to the model, which returns a full
-   revised intent. The difference between the old and new intent is computed in code and shown on the sheet: added
-   parts green, changed parts amber, removed parts listed. ERC and design-rule findings are shown to you, never
-   fixed silently.
+5. **Revise with small edits.** A chat message or a finding goes back to the model with the current intent. The
+   model does not rewrite the design: it returns a short list of operations (`add_part`, `remove_part`,
+   `set_value`, `set_symbol`, `connect`, `no_connect`, `rename_net`), and code applies them (`lib/ops.ts`). What
+   the operations do not mention cannot change. The result is validated, drafted and checked like a first draft,
+   and the difference is shown on the sheet: added parts green, changed parts amber, removed parts listed.
+6. **Review.** Every change shows a bar with what it did and two buttons, Keep and Undo. Clicking a part on the
+   sheet puts its ref in the chat box, so "R3: make this 4.7k" needs no typing of names. ERC and design-rule
+   findings are shown to you, never fixed silently.
 
 The file format was not written from memory: the emitter follows demo schematics that ship with KiCad, re-saved
 by the installed KiCad 10 with `kicad-cli sch upgrade`, and every change was checked by loading the output in
 `kicad-cli`. Those reference copies are not in this repository because they carry their authors' licences.
 
-### Catalogue
+### Parts
 
-`Regulator_Linear:AMS1117-3.3`, `Regulator_Linear:MIC5317-3.3xM5`, `Device:C`, `Device:C_Polarized`, `Device:R`,
-`Device:LED`, `Device:D_Schottky`, `Device:Polyfuse`, `Connector_Generic:Conn_01x02`,
-`Connector_Generic_MountingPin:Conn_01x02_MountingPin`, `Switch:SW_Push`, and the power symbols `power:+5V`,
-`power:+3V3`, `power:GND`, `power:PWR_FLAG`. The catalogue text the model sees (pin numbers, names, electrical
-types) is generated from the parsed library files: `npx tsx scripts/catalogue.ts`.
+Redline is not limited to a fixed list. It can use any single-unit symbol in the installed KiCad libraries (about
+21,000 on a stock KiCad 10 install):
+
+- A small core catalogue (regulators, R, C, LED, diodes, an NPN transistor, 2 to 4 pin connectors, a button) is
+  always described to the model with its pin numbers, names and electrical types.
+- `lib/engine/library-index.ts` scans every `.kicad_sym` file once and caches a search index. Part numbers in the
+  request ("NE555", "ATmega328P", "LM7805") and generic words ("crystal", "relay", "npn") are looked up, and the
+  matching symbols are added to the prompt with their real pin tables.
+- If the model names a symbol that does not exist, or a pin a symbol does not have, the validator replies with the
+  closest real symbols and their pins, and the model gets one retry.
+- A net named after any KiCad power symbol (`GND`, `+5V`, `+3V3`, `+12V`, `+9V`, `VCC`, `VBUS`, ...) is drawn
+  with that symbol.
+- Small parts are joined with wires. A sheet with a part of more than 8 pins, or more than 10 parts, is drawn with
+  net labels instead, which is how such sheets are usually drawn.
+
+Checked by hand-written examples in `examples/` (an NE555 blinker and an ATmega328P board, both ERC-clean) and by
+live runs: Gemma drew a correct NE555 astable and an LM7805 supply from one-line prompts.
+
+`npx tsx scripts/catalogue.ts` prints the core catalogue text the model sees.
 
 ## Model
 
@@ -159,13 +177,29 @@ npx tsx scripts/eval.ts
 - [docs/STACK.md](docs/STACK.md): the choice and the reason for every layer, and the one-command tasks.
 - [docs/LEARNINGS.md](docs/LEARNINGS.md): dated notes on what went wrong and what we changed.
 
+## Harder prompts
+
+`scripts/stress.ts` sends three larger requests through the live model. Two had finished when this was written:
+
+| Request | Result |
+| --- | --- |
+| ESP32-WROOM-32 board with USB-C power, AMS1117, reset and boot buttons, LED, UART header | 11 parts, 0 ERC errors, 0 warnings, one validation retry, 162 s. It used a plain 2-pin connector where a USB-C connector was asked for. |
+| 12 V dual-rail supply with fuse, diode, LM7805, AMS1117-3.3, LEDs and a header | 14 parts, 0 ERC errors, 0 warnings, 82 s. It used an AMS1117-5.0 where an LM7805 was asked for. |
+
+So larger designs come out valid, but the model sometimes substitutes a part without saying so. That is exactly
+the kind of thing the engineer corrects in chat ("use an LM7805 for U1"), and the edit shows up as a one-line diff.
+
 ## Limits
 
-- Small catalogue (eleven parts plus power symbols); anything else is rejected by the validator.
+- Multi-unit symbols (dual and quad op-amps, logic gates) are rejected; use a single-unit part.
+- One sheet only, and Redline edits only schematics it drew itself; it cannot open an existing `.kicad_sch`.
+- Parts outside the core catalogue depend on the model knowing how to use them. It can wire a legal but wrong
+  circuit: in one live run it left a transistor's collector unconnected to its load. KiCad's ERC flagged that one
+  as a warning; the design rules and golden answers only cover the circuits they were written for.
 - The wire router is simple. It is tidy for a row of parts such as a regulator block; on busier circuits the wires
   are correct but can take roundabout paths. Parts are drawn in the order the intent lists them.
-- The eval prompts do not use the two newer parts (MIC5317, mounting-pin connector); those were checked by hand
-  and by the acceptance tests.
+- The eval prompts only use core-catalogue parts. Library parts were checked with the examples, the acceptance
+  tests and three live prompts, not with the eval.
 - KiCad's mounting-pin connector symbol has one mounting pin; the JST GH part has two pads.
 - The design rules are three checks, not a review.
 - The hosted Gemma endpoint was slow (40 to 110 s per call) and returned occasional 500/503 errors during

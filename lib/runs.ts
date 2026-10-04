@@ -2,6 +2,7 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { draft, Finding, Intent, Layout, SymbolLibrary } from "./engine";
+import { LibraryIndex } from "./engine/library-index";
 import { CliResult, ErcReport, exportSvg, locateKicad, runErc } from "./kicad/cli";
 
 export const RUNS_DIR = join(process.cwd(), "runs");
@@ -10,6 +11,13 @@ let library: SymbolLibrary | undefined;
 export function symbolLibrary(): SymbolLibrary {
   if (!library) library = new SymbolLibrary(locateKicad().symbolDir);
   return library;
+}
+
+let index: LibraryIndex | undefined;
+/** Search index over every symbol in the installed libraries (built once, then cached on disk). */
+export function libraryIndex(): LibraryIndex {
+  if (!index) index = LibraryIndex.load(locateKicad().symbolDir);
+  return index;
 }
 
 export type RunResult =

@@ -37,6 +37,8 @@ export interface SymbolDef {
   /** Library position of each property, sheet orientation. */
   propAt: Record<string, { x: number; y: number }>;
   power: boolean;
+  /** Number of units. Only single-unit symbols can be drawn. */
+  units: number;
   inBom: string;
   onBoard: string;
 }
@@ -168,6 +170,7 @@ function build(libId: string, flat: Node[]): SymbolDef {
   }
 
   const pins: PinDef[] = [];
+  let units = 1;
   let body: Box | undefined;
   const add = (x: number, y: number, r = 0) => {
     body = unionBox(body, { x0: x - r, y0: -y - r, x1: x + r, y1: -y + r });
@@ -176,6 +179,7 @@ function build(libId: string, flat: Node[]): SymbolDef {
 
   for (const sub of children(flat, "symbol")) {
     const m = /_(\d+)_(\d+)$/.exec(text(sub[1]));
+    if (m) units = Math.max(units, Number(m[1]));
     if (!m || Number(m[1]) > 1 || Number(m[2]) > 1) continue; // unit 1, normal body style only
     for (const g of sub.slice(2)) {
       if (!isList(g)) continue;
@@ -227,6 +231,7 @@ function build(libId: string, flat: Node[]): SymbolDef {
     props,
     propAt,
     power: !!child(flat, "power"),
+    units,
     inBom: text(child(flat, "in_bom")?.[1]) || "yes",
     onBoard: text(child(flat, "on_board")?.[1]) || "yes",
   };

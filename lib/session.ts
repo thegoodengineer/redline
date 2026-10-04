@@ -7,7 +7,7 @@ import { ErcReport } from "./kicad/cli";
 import { generateIntent, IntentCall, reviseIntent } from "./model/calls";
 import { ModelProvider, ModelUsage } from "./model/provider";
 import { checkRules, RuleResult } from "./rules";
-import { RUNS_DIR, runDraft, symbolLibrary } from "./runs";
+import { libraryIndex, RUNS_DIR, runDraft, symbolLibrary } from "./runs";
 
 export interface Check {
   id: string;
@@ -25,6 +25,10 @@ export interface VersionMeta {
   request: string;
   model: string;
   attempts: number;
+  /** Edit operations the model returned for this revision. */
+  ops?: number;
+  /** Set when the engineer undid this change; it is then hidden from the version strip. */
+  undone?: boolean;
   usage: ModelUsage;
   ms: number;
   bytes: { intent: number; schematic: number };
@@ -99,7 +103,7 @@ async function commit(
   kind: VersionMeta["kind"],
   request: string,
   model: string,
-  call: Pick<IntentCall, "attempts" | "usage" | "ms"> & { intent: Intent },
+  call: Pick<IntentCall, "attempts" | "usage" | "ms" | "ops"> & { intent: Intent },
   previous?: Intent,
 ): Promise<Turn> {
   const version = (listVersions(session).at(-1) ?? 0) + 1;
@@ -112,6 +116,7 @@ async function commit(
     request,
     model,
     attempts: call.attempts,
+    ops: call.ops,
     usage: call.usage,
     ms: call.ms,
     bytes: run.bytes,
@@ -125,7 +130,7 @@ async function commit(
 
 export async function generate(session: string, request: string, provider: ModelProvider): Promise<Turn> {
   assertSession(session);
-  const call = await generateIntent(provider, symbolLibrary(), request);
+  const call = await generateIntent(provider, symbolLibrary(), request, libraryIndex());
   if (!call.ok || !call.intent) {
     return { ok: false, reason: "validation", findings: call.findings, attempts: call.attempts, usage: call.usage, ms: call.ms };
   }
@@ -134,11 +139,21 @@ export async function generate(session: string, request: string, provider: Model
 
 export async function revise(session: string, fromVersion: number, change: string, provider: ModelProvider): Promise<Turn> {
   const current = loadIntent(session, fromVersion);
-  const call = await reviseIntent(provider, symbolLibrary(), current, change);
+  const call = await reviseIntent(provider, symbolLibrary(), current, change, libraryIndex());
   if (!call.ok || !call.intent) {
     return { ok: false, reason: "validation", findings: call.findings, attempts: call.attempts, usage: call.usage, ms: call.ms };
   }
   return commit(session, "revise", change, provider.model, { ...call, intent: call.intent }, current);
+}
+
+/** Undo a change: the version stays on disk but is marked and no longer shown. */
+export function undoVersion(session: string, version: number): VersionMeta {
+  const file = join(versionDir(session, version), "meta.json");
+  const meta: VersionMeta = JSON.parse(readFileSync(file, "utf8"));
+  if (meta.kind === "generate") throw new Error("The first draft cannot be undone; start a new session instead.");
+  meta.undone = true;
+  writeFileSync(file, JSON.stringify(meta, null, 2) + "\n");
+  return meta;
 }
 
 /** Text sent to revise when the user presses "Fix this" on a check. */

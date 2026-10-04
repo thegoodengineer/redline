@@ -2,7 +2,7 @@
 // schematic saved by KiCad 10 (KiCad's own demos, re-saved with "kicad-cli sch upgrade").
 // Same intent, same bytes.
 import { createHash } from "node:crypto";
-import { POWER_NETS, PWR_FLAG } from "./catalogue";
+import { powerSymbolFor, PWR_FLAG } from "./catalogue";
 import { PartGeometry, powerSymbolAt, textWidth } from "./connect";
 import { Intent } from "./intent";
 import { ORIGIN_X, snapUp } from "./place";
@@ -58,10 +58,10 @@ function effects(justify?: string[]): Node[] {
   return e;
 }
 
-function property(name: string, value: string, x: number, y: number, o: { hide?: boolean; left?: boolean } = {}): Node[] {
+function property(name: string, value: string, x: number, y: number, o: { hide?: boolean; justify?: "left" | "center" | "right" } = {}): Node[] {
   const p: Node[] = ["property", q(name), q(value), at(x, y, 0)];
   if (o.hide) p.push(["hide", "yes"]);
-  p.push(["show_name", "no"], ["do_not_autoplace", "no"], effects(o.left ? ["left"] : undefined));
+  p.push(["show_name", "no"], ["do_not_autoplace", "no"], effects(o.justify && o.justify !== "center" ? [o.justify] : undefined));
   return p;
 }
 
@@ -103,8 +103,8 @@ export function emit(
     mirror?: boolean;
     ref: string;
     value: string;
-    refAt: { x: number; y: number; left?: boolean };
-    valueAt: { x: number; y: number; left?: boolean };
+    refAt: { x: number; y: number; justify?: "left" | "center" | "right" };
+    valueAt: { x: number; y: number; justify?: "left" | "center" | "right" };
     hideRef: boolean;
     seed: string;
     owner: { ref: string; net?: string; kind: string };
@@ -123,8 +123,8 @@ export function emit(
       ["in_pos_files", "yes"],
       ["dnp", "no"],
       ["uuid", q(id(`sym:${o.seed}`, o.owner))],
-      property("Reference", o.ref, o.refAt.x, o.refAt.y, { hide: o.hideRef, left: o.refAt.left }),
-      property("Value", o.value, o.valueAt.x, o.valueAt.y, { left: o.valueAt.left }),
+      property("Reference", o.ref, o.refAt.x, o.refAt.y, { hide: o.hideRef, justify: o.refAt.justify }),
+      property("Value", o.value, o.valueAt.x, o.valueAt.y, { justify: o.valueAt.justify }),
       property("Footprint", o.def.props.Footprint ?? "", o.x, o.y, { hide: true }),
       property("Datasheet", o.def.props.Datasheet ?? "", o.x, o.y, { hide: true }),
       property("Description", o.def.props.Description ?? "", o.x, o.y, { hide: true }),
@@ -144,12 +144,12 @@ export function emit(
       ["uuid", q(id(`wire:${seed}`, owner))],
     ]);
 
-  const label = (name: string, x: number, y: number, angle: 0 | 180, seed: string, owner: Layout["uuids"][string]) =>
+  const label = (name: string, x: number, y: number, angle: 0 | 90 | 180 | 270, seed: string, owner: Layout["uuids"][string]) =>
     labels.push([
       "label",
       q(name),
       at(x, y, angle),
-      effects([angle === 180 ? "right" : "left", "bottom"]),
+      effects([angle === 180 || angle === 270 ? "right" : "left", "bottom"]),
       ["uuid", q(id(`label:${seed}`, owner))],
     ]);
 
@@ -185,8 +185,8 @@ export function emit(
         mirror: g.mirror,
         ref: g.ref,
         value: g.value,
-        refAt: { x: o.x + g.reference.x, y: o.y + g.reference.y, left: g.reference.justify === "left" },
-        valueAt: { x: o.x + g.valueField.x, y: o.y + g.valueField.y, left: g.valueField.justify === "left" },
+        refAt: { x: o.x + g.reference.x, y: o.y + g.reference.y, justify: g.reference.justify },
+        valueAt: { x: o.x + g.valueField.x, y: o.y + g.valueField.y, justify: g.valueField.justify },
         hideRef: false,
         seed: g.ref,
         owner: { ref: g.ref, kind: "symbol" },
@@ -267,7 +267,7 @@ export function emit(
       const owner = flag.owner;
       wire(x, y, ax, y, `flag:${net}`, { ...owner, kind: "wire" });
       let box = flag.box;
-      const powerLibId = POWER_NETS[net];
+      const powerLibId = powerSymbolFor(net, lib);
       if (powerLibId) {
         powerSymbol(powerLibId, net, ax, y, 0, `flag:${net}`, owner.ref);
         box = unionBox(box, powerSymbolAt(lib.get(powerLibId), ax, y, 0, net).box);

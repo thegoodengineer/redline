@@ -1,9 +1,10 @@
 // GET  .../sch   downloads design.kicad_sch
 // POST .../open  launches the KiCad schematic editor on this machine
+// POST .../undo  marks this version as undone
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { openInEditor } from "@/lib/kicad/cli";
-import { versionDir } from "@/lib/session";
+import { undoVersion, versionDir } from "@/lib/session";
 
 export const runtime = "nodejs";
 type Ctx = { params: Promise<{ session: string; version: string; file: string }> };
@@ -32,6 +33,14 @@ export async function GET(_: Request, ctx: Ctx) {
 }
 
 export async function POST(_: Request, ctx: Ctx) {
+  const { session, version, file } = await ctx.params;
+  if (file === "undo") {
+    try {
+      return Response.json({ ok: true, meta: undoVersion(session, Number(version)) });
+    } catch (e) {
+      return Response.json({ error: e instanceof Error ? e.message : String(e) }, { status: 400 });
+    }
+  }
   const p = await schPath(ctx, "open");
   if (typeof p !== "string") return p;
   try {

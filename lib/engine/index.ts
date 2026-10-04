@@ -4,7 +4,7 @@ import { emit, Layout } from "./emit";
 import { groupOrder, Intent } from "./intent";
 import { place } from "./place";
 import { layoutWired, routeWires } from "./wired";
-import { POWER_NETS } from "./catalogue";
+import { powerSymbolFor } from "./catalogue";
 import { SymbolLibrary } from "./symbols";
 import { Finding, validate } from "./validate";
 
@@ -27,12 +27,15 @@ export function draft(input: unknown, lib: SymbolLibrary, options: DraftOptions 
   const netOf = netLookup(intent);
   const allFlags = options.powerFlags === false ? [] : netsNeedingFlag(intent, lib);
 
-  if ((options.wiring ?? intent.hints.wiring ?? "wires") === "wires") {
+  // Wires suit small parts in a row. A sheet with a big part (a microcontroller, a module) or many
+  // parts reads better with net labels, so that is the automatic choice there.
+  const busy = intent.parts.length > 10 || intent.parts.some((p) => lib.get(p.libId).pins.length > 8);
+  if ((options.wiring ?? intent.hints.wiring ?? (busy ? "labels" : "wires")) === "wires") {
     // Rails keep their flag in the island row; other undriven nets get the flag on their wire.
     const wired = layoutWired(intent, lib, netOf);
-    const wiring = routeWires(intent, wired.geoms, wired.origins, lib, allFlags.filter((n) => !POWER_NETS[n]));
+    const wiring = routeWires(intent, wired.geoms, wired.origins, lib, allFlags.filter((n) => !powerSymbolFor(n, lib)));
     if (wiring) {
-      const out = emit(intent, wired.geoms, wired.origins, allFlags.filter((n) => POWER_NETS[n]), lib, wiring);
+      const out = emit(intent, wired.geoms, wired.origins, allFlags.filter((n) => powerSymbolFor(n, lib)), lib, wiring);
       return { ok: true, intent, sch: out.sch, layout: out.layout };
     }
   }

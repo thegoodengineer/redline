@@ -9,7 +9,7 @@ import { RUNS_DIR, runDraft, symbolLibrary } from "../lib/runs";
 const load = (name: string) => JSON.parse(readFileSync(`examples/${name}.intent.json`, "utf8"));
 
 describe("acceptance", () => {
-  for (const name of ["reg-3v3", "led-button", "mic5317-3v3"]) {
+  for (const name of ["reg-3v3", "led-button", "mic5317-3v3", "ne555-blinker", "atmega328p-minimal"]) {
     it(`${name}: loads in KiCad with 0 ERC errors and 0 warnings, and exports an SVG`, async () => {
       const r = await runDraft(load(name), `test-${name}`, 1);
       expect(r.ok).toBe(true);

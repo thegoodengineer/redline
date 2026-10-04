@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "title": "ATmega328P minimal board",
+  "comment": "Written by hand. A 32-pin microcontroller from MCU_Microchip_ATmega with a 16 MHz crystal, reset pull-up and button, decoupling, and an LED on PB5. Unused port pins are no-connects. A part this size is drawn with net labels.",
+  "parts": [
+    { "ref": "J1", "libId": "Connector_Generic:Conn_01x02", "value": "5V_IN", "group": "power" },
+    { "ref": "C3", "libId": "Device:C", "value": "100nF", "group": "power" },
+    { "ref": "R1", "libId": "Device:R", "value": "10k", "group": "reset" },
+    { "ref": "SW1", "libId": "Switch:SW_Push", "value": "RESET", "group": "reset" },
+    { "ref": "U1", "libId": "MCU_Microchip_ATmega:ATmega328P-A", "value": "ATmega328P-A", "group": "mcu" },
+    { "ref": "Y1", "libId": "Device:Crystal", "value": "16MHz", "group": "clock" },
+    { "ref": "C1", "libId": "Device:C", "value": "22pF", "group": "clock" },
+    { "ref": "C2", "libId": "Device:C", "value": "22pF", "group": "clock" },
+    { "ref": "R2", "libId": "Device:R", "value": "1k", "group": "led" },
+    { "ref": "D1", "libId": "Device:LED", "value": "GREEN", "group": "led" }
+  ],
+  "nets": [
+    { "name": "+5V", "pins": ["J1.1", "C3.1", "R1.1", "U1.4", "U1.6", "U1.18"] },
+    { "name": "GND", "pins": ["J1.2", "C3.2", "SW1.2", "U1.3", "U1.5", "U1.21", "C1.2", "C2.2", "D1.1"] },
+    { "name": "RESET", "pins": ["R1.2", "SW1.1", "U1.29"] },
+    { "name": "XTAL1", "pins": ["U1.7", "Y1.1", "C1.1"] },
+    { "name": "XTAL2", "pins": ["U1.8", "Y1.2", "C2.1"] },
+    { "name": "LED", "pins": ["U1.17", "R2.1"] },
+    { "name": "LED_A", "pins": ["R2.2", "D1.2"] }
+  ],
+  "noConnect": ["U1.1", "U1.2", "U1.9", "U1.10", "U1.11", "U1.12", "U1.13", "U1.14", "U1.15", "U1.16", "U1.19", "U1.20", "U1.22", "U1.23", "U1.24", "U1.25", "U1.26", "U1.27", "U1.28", "U1.30", "U1.31", "U1.32"],
+  "hints": { "groupOrder": ["power", "reset", "mcu", "clock", "led"] }
+}

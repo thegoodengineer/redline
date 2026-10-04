@@ -1,5 +1,8 @@
 // generate and revise: prompt in, validated intent out. One retry on validation failure.
 import { catalogueText, Finding, Intent, SymbolLibrary } from "../engine";
+import { isCataloguePart } from "../engine/catalogue";
+import type { LibraryIndex } from "../engine/library-index";
+import { applyOps, OPS_HELP, OpsSchema } from "../ops";
 import { validate } from "../engine/validate";
 import { addUsage, ModelProvider, ModelUsage, NO_USAGE } from "./provider";
 
@@ -20,7 +23,7 @@ const EXAMPLE = {
   hints: { groupOrder: ["input", "indicator"] },
 };
 
-export function systemPrompt(lib: SymbolLibrary): string {
+export function systemPrompt(lib: SymbolLibrary, found: string[] = []): string {
   return `You are a hardware engineer. You describe a circuit as a JSON "intent". A program draws the KiCad schematic from it, so you never write coordinates, wires or symbols.
 
 OUTPUT
@@ -34,18 +37,18 @@ SHAPE
   "hints": { "groupOrder": [string] } }
 
 RULES
-1. Use only libIds from the catalogue below, spelled exactly.
+1. Prefer libIds from the catalogue below, spelled exactly. If the request needs a part that is not listed, you may use any other single-unit symbol from the standard KiCad libraries by its exact "Library:Symbol" id and its real pin numbers; the validator will correct you if it does not exist. Never use multi-unit symbols (dual or quad op-amps, logic gates).
 2. ref = the catalogue ref prefix plus a number (R1, R2, C1). Every ref is unique.
 3. A pin is "REF.NUMBER" using the pin numbers from the catalogue, never pin names.
 4. Every pin of every part appears in exactly one net, or in noConnect. No pin appears twice. Pins of type no_connect and unused mounting pins go in noConnect.
-5. Name the rails exactly GND, +5V and +3V3. Other nets get short upper-case names like VIN or LED_A.
+5. Name supply rails after KiCad power symbols: GND, +5V, +3V3, +12V, +9V, VCC, VBUS, +BATT. Other nets get short upper-case names like VIN or LED_A.
 6. Power symbols are drawn for you. Never list a power: symbol as a part.
 7. group is a short lower-case block name (input, regulator, output). hints.groupOrder lists the groups left to right in signal-flow order. List parts in signal-flow order too (input connector, input capacitor, regulator, output capacitor, output connector): they are drawn left to right in that order and joined with wires.
 8. value is the component value (10uF, 330, 1k) or, for connectors and switches, a short function name.
 9. Good practice: a regulator needs a capacitor from its input to GND and from its output to GND; every LED needs a series resistor; a regulator's input and output must be different nets. The AMS1117 datasheet asks for 22uF on the output; the MIC5317 needs 1uF on input and output.
 
 CATALOGUE
-${catalogueText(lib)}
+${catalogueText(lib, found)}
 
 EXAMPLE (a different circuit, for the format only)
 ${JSON.stringify(EXAMPLE)}`;
@@ -68,12 +71,15 @@ export interface IntentCall {
   findings: Finding[];
   /** 1, or 2 when the first answer failed validation. */
   attempts: number;
+  /** For a revision: how many edit operations the model returned (undefined if it sent a whole intent). */
+  ops?: number;
   usage: ModelUsage;
   ms: number;
 }
 
-async function callForIntent(provider: ModelProvider, lib: SymbolLibrary, user: string): Promise<IntentCall> {
-  const system = systemPrompt(lib);
+/** `current` is set for a revision: the model may then answer with edit operations instead of a whole intent. */
+async function callForIntent(provider: ModelProvider, lib: SymbolLibrary, user: string, found: string[], index?: LibraryIndex, current?: Intent): Promise<IntentCall> {
+  const system = systemPrompt(lib, found);
   let usage = NO_USAGE;
   let ms = 0;
   let findings: Finding[] = [];
@@ -89,14 +95,31 @@ async function callForIntent(provider: ModelProvider, lib: SymbolLibrary, user: 
       findings = [{ id: 1, code: "schema", message: `reply is not valid JSON: ${e instanceof Error ? e.message : e}` }];
       candidate = undefined;
     }
+    let ops: number | undefined;
+    if (candidate !== undefined && current && typeof candidate === "object" && candidate !== null && "ops" in candidate) {
+      // Edit operations: apply them in code to the current intent, then validate the result as usual.
+      const parsed = OpsSchema.safeParse(candidate);
+      if (!parsed.success) {
+        findings = parsed.error.issues.map((issue, i) => ({ id: i + 1, code: "schema" as const, message: `${issue.path.join(".")}: ${issue.message}` }));
+        candidate = undefined;
+      } else {
+        try {
+          ops = parsed.data.ops.length;
+          candidate = applyOps(current, parsed.data.ops);
+        } catch (e) {
+          findings = [{ id: 1, code: "schema", message: e instanceof Error ? e.message : String(e) }];
+          candidate = undefined;
+        }
+      }
+    }
     if (candidate !== undefined) {
-      const v = validate(candidate, lib);
-      if (v.ok) return { ok: true, intent: v.intent, findings: [], attempts: attempt, usage, ms };
+      const v = validate(candidate, lib, index);
+      if (v.ok) return { ok: true, intent: v.intent, findings: [], attempts: attempt, ops, usage, ms };
       findings = v.findings;
     }
     prompt = `${user}
 
-Your previous answer was rejected by the validator. Fix every finding and return the full corrected intent.
+Your previous answer was rejected by the validator. Fix every finding and return ${current ? "the full corrected list of ops (they are applied to the CURRENT INTENT above, not to your previous answer)" : "the full corrected intent"}.
 FINDINGS
 ${findings.map((f) => `${f.id}. ${f.message}`).join("\n")}
 PREVIOUS ANSWER
@@ -105,8 +128,13 @@ ${reply.text}`;
   return { ok: false, findings, attempts: 2, usage, ms };
 }
 
-export function generateIntent(provider: ModelProvider, lib: SymbolLibrary, request: string): Promise<IntentCall> {
-  return callForIntent(provider, lib, `CIRCUIT REQUEST\n${request}`);
+/** Symbols in the installed libraries that fit the words of a request. */
+function lookUp(index: LibraryIndex | undefined, text: string): string[] {
+  return index ? index.search(text, 10).map((e) => e.id) : [];
+}
+
+export function generateIntent(provider: ModelProvider, lib: SymbolLibrary, request: string, index?: LibraryIndex): Promise<IntentCall> {
+  return callForIntent(provider, lib, `CIRCUIT REQUEST\n${request}`, lookUp(index, request), index);
 }
 
 export function reviseIntent(
@@ -114,7 +142,10 @@ export function reviseIntent(
   lib: SymbolLibrary,
   current: Intent,
   change: string,
+  index?: LibraryIndex,
 ): Promise<IntentCall> {
+  // Keep the pin tables of the parts already on the sheet, and look up anything the change names.
+  const inUse = current.parts.map((p) => p.libId).filter((id) => !isCataloguePart(id));
   return callForIntent(
     provider,
     lib,
@@ -124,6 +155,9 @@ ${JSON.stringify(current)}
 CHANGE REQUEST
 ${change}
 
-Return the full revised intent. Keep every part, ref, value and net that the change does not affect exactly as it is.`,
+For a change request do not return the whole intent. ${OPS_HELP}`,
+    [...new Set([...inUse, ...lookUp(index, change)])],
+    index,
+    current,
   );
 }

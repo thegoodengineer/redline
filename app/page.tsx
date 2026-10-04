@@ -79,7 +79,7 @@ export default function Home() {
         <div>
           <span className="label">1 · Intent</span>
           <h2>The model writes parts and nets</h2>
-          <p>Gemma 4 returns a small JSON intent: refs, library symbols, values, and which pins share a net. It never writes a coordinate.</p>
+          <p>Gemma 4 returns a small JSON intent: refs, library symbols, values, and which pins share a net. Parts are looked up in your installed KiCad libraries. It never writes a coordinate.</p>
         </div>
         <div>
           <span className="label">2 · Draft</span>

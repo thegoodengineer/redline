@@ -64,6 +64,7 @@ export class GemmaProvider implements ModelProvider {
         config: {
           systemInstruction: request.system,
           temperature: 0.2,
+          maxOutputTokens: 8192,
           thinkingConfig: {
             thinkingLevel: this.thinking === "high" ? ThinkingLevel.HIGH : ThinkingLevel.MINIMAL,
           },
@@ -74,6 +75,11 @@ export class GemmaProvider implements ModelProvider {
     for (let attempt = 0; response === undefined; attempt++) {
       try {
         response = await call();
+        if (!(response.text ?? "").trim() && attempt < 2) {
+          // Seen in practice: a 200 response with no text. Ask again rather than fail the turn.
+          console.error(`[gemma] empty reply (finish reason ${response.candidates?.[0]?.finishReason ?? "unknown"}), asking again`);
+          response = undefined;
+        }
       } catch (e) {
         const status = (e as { status?: number }).status;
         if (attempt >= 2 || (status !== 429 && status !== 500 && status !== 503)) throw e;

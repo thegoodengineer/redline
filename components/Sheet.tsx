@@ -25,7 +25,8 @@ function boxOf(layout: Layout, ref: string) {
   return layout.parts[ref] ?? layout.flags.find((f) => f.ref === ref);
 }
 
-export default function Sheet({ svg, layout, marks, fitKey }: { svg: string; layout: Layout; marks: Mark[]; fitKey: string }) {
+export default function Sheet({ svg, layout, marks, fitKey, onPick }: { svg: string; layout: Layout; marks: Mark[]; fitKey: string; onPick?: (ref: string) => void }) {
+  const moved = useRef(0);
   const el = useRef<SVGSVGElement>(null);
   const [size, setSize] = useState({ w: 800, h: 600 });
   const [view, setView] = useState<View | null>(null);
@@ -98,6 +99,7 @@ export default function Sheet({ svg, layout, marks, fitKey }: { svg: string; lay
         aria-label="Schematic drawn by KiCad"
         onPointerDown={(e) => {
           drag.current = { x: e.clientX, y: e.clientY };
+          moved.current = 0;
           setDragging(true);
           e.currentTarget.setPointerCapture(e.pointerId);
         }}
@@ -105,16 +107,26 @@ export default function Sheet({ svg, layout, marks, fitKey }: { svg: string; lay
           if (!drag.current) return;
           const dx = e.clientX - drag.current.x;
           const dy = e.clientY - drag.current.y;
+          moved.current += Math.abs(dx) + Math.abs(dy);
           drag.current = { x: e.clientX, y: e.clientY };
           setView((p) => (p ? { ...p, cx: p.cx - dx * p.scale, cy: p.cy - dy * p.scale } : p));
         }}
-        onPointerUp={() => {
+        onPointerUp={(e) => {
           drag.current = null;
           setDragging(false);
+          // A click (not a drag) on a part mentions it in the chat.
+          const ref = (document.elementFromPoint(e.clientX, e.clientY) as Element | null)?.getAttribute("data-ref");
+          if (ref && moved.current < 5) onPick?.(ref);
         }}
         onDoubleClick={() => setView(fit(size.w, size.h))}
       >
         <g dangerouslySetInnerHTML={inner} />
+        {onPick &&
+          Object.entries(layout.parts).map(([ref, b]) => (
+            <rect key={ref} className="hit" data-ref={ref} x={b.x - 1} y={b.y - 1} width={b.w + 2} height={b.h + 2}>
+              <title>{`Click to mention ${ref} in the chat`}</title>
+            </rect>
+          ))}
         {marks.map((m, i) => {
           const b = boxOf(layout, m.ref);
           if (!b) return null;

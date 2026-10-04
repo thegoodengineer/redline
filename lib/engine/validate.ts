@@ -1,5 +1,6 @@
 // Structural checks on an intent. Any finding here means nothing is written.
-import { isCataloguePart } from "./catalogue";
+import { pinTable, unusableReason } from "./catalogue";
+import type { LibraryIndex } from "./library-index";
 import { Intent, IntentSchema, splitPin } from "./intent";
 import { SymbolLibrary } from "./symbols";
 
@@ -13,6 +14,7 @@ export interface Finding {
     | "unknown_pin"
     | "pin_in_two_nets"
     | "pin_unassigned"
+    | "stacked_pins"
     | "duplicate_net";
   message: string;
   ref?: string;
@@ -22,7 +24,8 @@ export interface Finding {
 
 export type ValidateResult = { ok: true; intent: Intent } | { ok: false; findings: Finding[] };
 
-export function validate(input: unknown, lib: SymbolLibrary): ValidateResult {
+/** `index` is optional; with it, a finding about an unknown symbol names the closest real ones and their pins. */
+export function validate(input: unknown, lib: SymbolLibrary, index?: LibraryIndex): ValidateResult {
   const findings: Finding[] = [];
   const add = (f: Omit<Finding, "id">) => findings.push({ id: findings.length + 1, ...f });
 
@@ -36,21 +39,27 @@ export function validate(input: unknown, lib: SymbolLibrary): ValidateResult {
   const intent = parsed.data;
 
   const pinsOf = new Map<string, Set<string>>();
+  const libOf = new Map<string, string>();
   for (const part of intent.parts) {
     if (pinsOf.has(part.ref)) {
       add({ code: "duplicate_ref", ref: part.ref, message: `ref ${part.ref} is used by more than one part` });
       continue;
     }
-    if (!isCataloguePart(part.libId) || !lib.has(part.libId)) {
+    const why = unusableReason(part.libId, lib);
+    if (why) {
+      const close = (index?.suggest(part.libId) ?? []).filter((e) => unusableReason(e.id, lib) === null);
       add({
         code: "unknown_libid",
         ref: part.ref,
-        message: `${part.ref}: libId "${part.libId}" is not in the catalogue`,
+        message:
+          `${part.ref}: libId "${part.libId}" cannot be used: ${why}` +
+          (close.length ? `. Closest symbols: ${close.map((e) => `${e.id} [${pinTable(e.id, lib)}]`).join("; ")}` : ""),
       });
       pinsOf.set(part.ref, new Set());
       continue;
     }
     pinsOf.set(part.ref, new Set(lib.get(part.libId).pins.map((p) => p.number)));
+    libOf.set(part.ref, part.libId);
   }
   const badParts = new Set(findings.filter((f) => f.code === "unknown_libid").map((f) => f.ref));
 
@@ -69,7 +78,7 @@ export function validate(input: unknown, lib: SymbolLibrary): ValidateResult {
         ref,
         pin,
         net,
-        message: `${p} in ${net}: ${ref} has no pin ${pin} (pins: ${[...known].join(", ")})`,
+        message: `${p} in ${net}: ${ref} has no pin ${pin}. ${libOf.get(ref)} pins are ${pinTable(libOf.get(ref)!, lib)}`,
       });
       return;
     }
@@ -99,6 +108,23 @@ export function validate(input: unknown, lib: SymbolLibrary): ValidateResult {
           ref: part.ref,
           pin,
           message: `${part.ref}.${pin} is in no net and not in noConnect`,
+        });
+      }
+    }
+  }
+
+  // Pins drawn on top of each other in the symbol are one point on the sheet, so they must share a net.
+  for (const part of intent.parts) {
+    if (badParts.has(part.ref) || !libOf.has(part.ref)) continue;
+    const at = new Map<string, string[]>();
+    for (const p of lib.get(part.libId).pins) at.set(`${p.x},${p.y}`, [...(at.get(`${p.x},${p.y}`) ?? []), p.number]);
+    for (const stack of at.values()) {
+      const nets = new Set(stack.map((n) => where.get(`${part.ref}.${n}`)));
+      if (stack.length > 1 && nets.size > 1) {
+        add({
+          code: "stacked_pins",
+          ref: part.ref,
+          message: `${part.ref} pins ${stack.join(", ")} are drawn at the same point in the symbol and must all be on the same net`,
         });
       }
     }

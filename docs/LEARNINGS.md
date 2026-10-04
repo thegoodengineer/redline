@@ -43,6 +43,26 @@ Busier circuits route correctly but less neatly.
 edge it must be mirrored, or every wire has to go around it. The engine mirrors a part when all its side pins face
 away from the parts it connects to.
 
+**A fixed parts list was the real limit, not the engine.** The engine could always draw any library symbol; only
+the prompt was limited to a hand-picked catalogue. A line-by-line scan of the 234 MB of symbol libraries builds a
+search index in about 3 seconds (cached afterwards), and looking up the part numbers in the request puts the right
+pin tables in front of the model. The model still makes design mistakes with parts it knows less well.
+
+**Search precision matters more than recall.** The first version of the search returned 12-pin connectors and a
+heatsink for "2-pin connector", wasting prompt space. Treating "2-pin", "16MHz" and "10k" as quantities, and
+matching plain words only against the names of generic parts, fixed it.
+
+**Pins can be stacked.** Large symbols draw several supply pins at one point. Two stubs on that point are one
+connection, so the validator requires them to share a net and the engine draws them once.
+
+**Edits, not rewrites.** Asking the model for the whole design on every change is slow and lets it alter things
+nobody asked about. Returning a short list of operations that code applies cut a two-part change to 308 output
+tokens, and untouched parts are guaranteed identical. This is the difference between a generator and an editor.
+
+**Drawing was never the bottleneck.** An engineer draws a regulator block in minutes. The time goes into
+datasheets, repetitive support circuitry and rework, so the value is in a fast first draft of the boring parts and
+in changes with a visible diff and automatic checks.
+
 **ERC-clean is not the same as correct.** A reversed LED or a pull-up where a pull-down was asked for passes ERC.
 Hand-written golden answers per eval prompt, matched up to renaming, close that gap. Writing them also caught a bug
 in our own design rule: with a button between the resistor and the LED, "LED has a series resistor" wrongly failed.

@@ -1,7 +1,7 @@
 // Connection without wire routing: every pin gets a short stub that ends in
 // a net label, or in a power symbol when the net is GND, +5V or +3V3.
 // All coordinates here are local to the part origin, sheet orientation.
-import { POWER_NETS } from "./catalogue";
+import { powerSymbolFor } from "./catalogue";
 import { Intent, splitPin } from "./intent";
 import { Box, PinDef, PinDir, SymbolDef, SymbolLibrary, unionBox } from "./symbols";
 
@@ -15,7 +15,7 @@ export interface TextField {
   text: string;
   x: number;
   y: number;
-  justify: "left" | "center";
+  justify: "left" | "center" | "right";
 }
 
 export interface Attachment {
@@ -26,7 +26,7 @@ export interface Attachment {
   /** Stub end. Equal to the pin position for "nc". */
   ex: number;
   ey: number;
-  labelAngle?: 0 | 180;
+  labelAngle?: 0 | 90 | 180 | 270;
   powerLibId?: string;
   rotation?: 0 | 180;
   valueAt?: { x: number; y: number };
@@ -59,13 +59,36 @@ export const textWidth = (s: string) => Math.max(1, s.length) * CHAR_W;
 
 export function fieldBox(f: TextField): Box {
   const w = textWidth(f.text);
-  const x0 = f.justify === "left" ? f.x : f.x - w / 2;
+  const x0 = f.justify === "left" ? f.x : f.justify === "right" ? f.x - w : f.x - w / 2;
   return { x0, y0: f.y - TEXT_HALF_H, x1: x0 + w, y1: f.y + TEXT_HALF_H };
 }
 
 export function intersects(a: Box, b: Box): boolean {
   const e = 0.01;
   return a.x0 < b.x1 - e && a.x1 > b.x0 + e && a.y0 < b.y1 - e && a.y1 > b.y0 + e;
+}
+
+/**
+ * Where the reference and value go: beside the body for vertical two-terminal parts, above it
+ * for parts with side pins, and above the top-left corner when the top edge has pins of its own.
+ */
+export function placeFields(ref: string, value: string, graphics: Box, pins: PinDef[]): { reference: TextField; valueField: TextField } {
+  if (!pins.some((p) => p.dir === "L" || p.dir === "R")) {
+    const x = graphics.x1 + GRID;
+    return { reference: { text: ref, x, y: -GRID, justify: "left" }, valueField: { text: value, x, y: GRID, justify: "left" } };
+  }
+  if (pins.some((p) => p.dir === "U")) {
+    const x = graphics.x0 - 0.5;
+    return {
+      valueField: { text: value, x, y: graphics.y0 - 1.5, justify: "right" },
+      reference: { text: ref, x, y: graphics.y0 - 3.5, justify: "right" },
+    };
+  }
+  const x = (graphics.x0 + graphics.x1) / 2;
+  return {
+    valueField: { text: value, x, y: graphics.y0 - 1.5, justify: "center" },
+    reference: { text: ref, x, y: graphics.y0 - 3.5, justify: "center" },
+  };
 }
 
 /** Which way a power symbol's graphic points when not rotated. */
@@ -97,19 +120,7 @@ export function buildPart(
   let body = def.body;
   for (const p of def.pins) body = unionBox(body, { x0: p.x, y0: p.y, x1: p.x, y1: p.y });
 
-  // Fields: beside the body for vertical two-terminal parts, above it otherwise.
-  const horizontalPins = def.pins.some((p) => p.dir === "L" || p.dir === "R");
-  let reference: TextField;
-  let valueField: TextField;
-  if (!horizontalPins) {
-    const x = def.body.x1 + GRID;
-    reference = { text: part.ref, x, y: -GRID, justify: "left" };
-    valueField = { text: part.value, x, y: GRID, justify: "left" };
-  } else {
-    const x = (def.body.x0 + def.body.x1) / 2;
-    valueField = { text: part.value, x, y: def.body.y0 - 1.5, justify: "center" };
-    reference = { text: part.ref, x, y: def.body.y0 - 3.5, justify: "center" };
-  }
+  const { reference, valueField } = placeFields(part.ref, part.value, def.body, def.pins);
 
   // Fields get side clearance so a neighbouring label or power symbol never sits flush against them.
   const padded = (b: Box): Box => ({ ...b, x0: b.x0 - 2.5, x1: b.x1 + 2.5 });
@@ -122,12 +133,12 @@ export function buildPart(
     const ex = pin.x + v.x * len;
     const ey = pin.y + v.y * len;
     const wire: Box = {
-      x0: Math.min(pin.x, ex) - (v.x ? 0 : 0.3),
-      y0: Math.min(pin.y, ey) - (v.y ? 0 : 0.3),
-      x1: Math.max(pin.x, ex) + (v.x ? 0 : 0.3),
-      y1: Math.max(pin.y, ey) + (v.y ? 0 : 0.3),
+      x0: Math.min(pin.x, ex) - (v.x ? 0 : 0.1),
+      y0: Math.min(pin.y, ey) - (v.y ? 0 : 0.1),
+      x1: Math.max(pin.x, ex) + (v.x ? 0 : 0.1),
+      y1: Math.max(pin.y, ey) + (v.y ? 0 : 0.1),
     };
-    const powerLibId = POWER_NETS[net];
+    const powerLibId = powerSymbolFor(net, lib);
     if (powerLibId) {
       const pdef = lib.get(powerLibId);
       const natural = naturalDir(pdef);
@@ -137,27 +148,41 @@ export function buildPart(
       const att: Attachment = { pin, kind: "power", net, ex, ey, powerLibId, rotation, valueAt };
       return { att, boxes: [wire, box] };
     }
-    // Labels are always horizontal text; they run left only from a left-facing pin.
-    const labelAngle: 0 | 180 = pin.dir === "L" ? 180 : 0;
+    // Labels are horizontal text, running left only from a left-facing pin. A part with several
+    // pins along its top or bottom edge gets vertical labels there so they cannot overlap.
+    const crowded = (pin.dir === "U" || pin.dir === "D") && def.pins.filter((p) => p.dir === pin.dir).length > 1;
+    const labelAngle: 0 | 90 | 180 | 270 = crowded ? (pin.dir === "U" ? 90 : 270) : pin.dir === "L" ? 180 : 0;
     const w = textWidth(net) + 0.5;
     const box: Box =
       labelAngle === 180
         ? { x0: ex - w, y0: ey - 1.9, x1: ex, y1: ey + 0.3 }
-        : { x0: ex, y0: ey - 1.9, x1: ex + w, y1: ey + 0.3 };
+        : labelAngle === 0
+          ? { x0: ex, y0: ey - 1.9, x1: ex + w, y1: ey + 0.3 }
+          : labelAngle === 90
+            ? { x0: ex - 1.9, y0: ey - w, x1: ex + 0.3, y1: ey }
+            : { x0: ex - 1.9, y0: ey, x1: ex + 0.3, y1: ey + w };
     const att: Attachment = { pin, kind: "label", net, ex, ey, labelAngle };
     return { att, boxes: [wire, box] };
   };
 
   const byPosition = (a: PinDef, b: PinDef) => a.y - b.y || a.x - b.x;
   const connected = def.pins.filter((p) => netOf(p.number) !== null);
-  const isPower = (p: PinDef) => POWER_NETS[netOf(p.number)!] !== undefined;
+  const isPower = (p: PinDef) => powerSymbolFor(netOf(p.number), lib) !== undefined;
   // Labels first, then power symbols, so a power symbol steps outward past a neighbour's label.
   const order = [
     ...connected.filter((p) => !isPower(p)).sort(byPosition),
     ...connected.filter(isPower).sort(byPosition),
   ];
+  const drawn = new Set<string>();
   for (const pin of order) {
     const net = netOf(pin.number)!;
+    // Pins stacked at one point share whatever is drawn for the first of them.
+    const point = `${pin.x},${pin.y},${net}`;
+    if (drawn.has(point)) {
+      attachments.push({ pin, kind: "stub", net, ex: pin.x, ey: pin.y });
+      continue;
+    }
+    drawn.add(point);
     let chosen = geometry(pin, net, STUB);
     for (let k = 0; k < 12; k++) {
       const g = geometry(pin, net, STUB + k * STUB);
@@ -202,7 +227,7 @@ export function netsNeedingFlag(intent: Intent, lib: SymbolLibrary): string[] {
       const { ref, pin } = splitPin(p);
       return lib.get(libIdOf.get(ref)!).pins.find((d) => d.number === pin)!.type;
     });
-    const needsDriver = POWER_NETS[net.name] !== undefined || types.includes("power_in");
+    const needsDriver = powerSymbolFor(net.name, lib) !== undefined || types.includes("power_in");
     if (needsDriver && !types.includes("power_out")) out.push(net.name);
   }
   return out;

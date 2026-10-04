@@ -28,6 +28,8 @@ interface Failure {
 }
 
 const fmt = (n: number) => n.toLocaleString("en-US");
+/** Versions the engineer has not undone. */
+const visible = (list: VersionPayload[]) => list.filter((v) => !v.meta.undone);
 const newSession = () => `s-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
 
 export default function Studio() {
@@ -47,6 +49,9 @@ export default function Studio() {
   const [failures, setFailures] = useState<Failure[]>([]);
   const [draft, setDraft] = useState("");
   const [hover, setHover] = useState<string | null>(null);
+  /** The version just produced by a change, waiting for Keep or Undo. */
+  const [review, setReview] = useState<number | null>(null);
+  const composer = useRef<HTMLTextAreaElement>(null);
   const [revealed, setRevealed] = useState<number>(Infinity);
   const [notice, setNotice] = useState<string | null>(null);
   const logEnd = useRef<HTMLDivElement>(null);
@@ -66,6 +71,7 @@ export default function Studio() {
       })
       .then((v) => {
         if (!live) return;
+        v = demo ? v : visible(v);
         if (demo) {
           // ?start=N opens the demo with the first N recorded versions already shown.
           const start = Math.min(Number(params.get("start")) || 0, v.length);
@@ -149,8 +155,9 @@ export default function Studio() {
         if ("error" in turn) return fail("Request failed", [], turn.error);
         if (!turn.ok) return fail(`Rejected by the validator after ${turn.attempts} attempts. Nothing was written.`, turn.findings);
         const fresh = await fetch(`/api/session/${sid}`).then((x) => x.json());
-        setVersions(fresh.versions);
+        setVersions(visible(fresh.versions));
         setCurrent(turn.meta.version);
+        setReview(turn.meta.kind === "revise" ? turn.meta.version : null);
         setRevealed(0);
         setDraft("");
       } catch (e) {
@@ -169,6 +176,26 @@ export default function Studio() {
     const t = setTimeout(() => run({ action: "generate", text: "" }), versions.length ? 5000 : 1500);
     return () => clearTimeout(t);
   }, [auto, busy, next, revealed, checks.length, versions.length, run]);
+
+  /** Undo the change under review: the version is marked on the server and the previous one is shown. */
+  const undo = async () => {
+    if (review === null || !session) return;
+    const r = await fetch(`/api/session/${session}/${review}/undo`, { method: "POST" });
+    const body = await r.json();
+    if (!r.ok) return setNotice(`Could not undo: ${body.error}`);
+    const left = versions.filter((v) => v.meta.version !== review);
+    setVersions(left);
+    setCurrent(left.at(-1)?.meta.version ?? null);
+    setRevealed(Infinity);
+    setNotice(`v${review} undone.`);
+    setReview(null);
+  };
+  /** Clicking a part on the sheet puts its ref in the chat box. */
+  const pick = (ref: string) => {
+    if (demo) return;
+    setDraft((d) => (d && !d.endsWith(" ") ? d + " " : d) + ref + " ");
+    composer.current?.focus();
+  };
 
   const submit = () => {
     const text = draft.trim();
@@ -294,7 +321,7 @@ export default function Studio() {
                 <p>
                   {demo
                     ? "This is a recorded session: three real turns with gemma-4-31b-it, replayed from the demo folder with no API or kicad-cli calls. Press Replay to step through it."
-                    : "Describe a circuit in plain words. Gemma writes the parts and nets; code draws the sheet and KiCad checks it."}
+                    : "Describe a circuit in plain words. Gemma writes the parts and nets; code draws the sheet and KiCad checks it. Then ask for changes, or click a part to mention it."}
                 </p>
                 <div className="examples" style={demo ? { display: "none" } : undefined}>
                   <span className="label">Try one</span>
@@ -327,6 +354,7 @@ export default function Studio() {
                         <ul className="facts">
                           <li>
                             {v.intent.parts.length} parts, {v.intent.nets.length} nets, {fmt(v.meta.usage.totalTokens)} tokens
+                            {v.meta.ops !== undefined ? `, ${v.meta.ops} edit${v.meta.ops === 1 ? "" : "s"}` : ""}
                             {v.meta.attempts > 1 ? ", 1 validation retry" : ""}
                           </li>
                           {v.meta.diff && !v.meta.diff.same && (
@@ -391,6 +419,7 @@ export default function Studio() {
           </div>
           <div className="composer">
             <textarea
+              ref={composer}
               value={draft}
               placeholder={demo ? "End of the recorded session." : payload ? `Ask for a change to v${payload.meta.version}…` : "Describe the circuit…"}
               disabled={!!busy}
@@ -417,7 +446,24 @@ export default function Studio() {
           <div className="sheetwrap">
             {payload && (
               <>
-                <Sheet svg={payload.svg} layout={payload.layout} marks={marks} fitKey={`${session}-${payload.meta.version}`} />
+                <Sheet svg={payload.svg} layout={payload.layout} marks={marks} fitKey={`${session}-${payload.meta.version}`} onPick={pick} />
+                {review === payload.meta.version && !busy && (
+                  <div className="review">
+                    <span className="mono">
+                      v{review} · {m?.ops !== undefined ? `${m.ops} edit${m.ops === 1 ? "" : "s"}` : "rewritten"}
+                      {diff && diff.added.length > 0 ? ` · +${diff.added.join(" +")}` : ""}
+                      {diff && diff.removed.length > 0 ? ` · −${diff.removed.join(" −")}` : ""}
+                      {diff && diff.changed.length > 0 ? ` · ~${diff.changed.map((c) => c.ref).join(" ~")}` : ""}
+                      {diff?.same ? " · no change" : ""}
+                    </span>
+                    <button className="btn small" onClick={undo}>
+                      Undo
+                    </button>
+                    <button className="btn small keep" onClick={() => setReview(null)}>
+                      Keep
+                    </button>
+                  </div>
+                )}
                 {(diff && !diff.same) || failCount > 0 ? (
                   <div className="legend">
                     {diff && diff.added.length > 0 && (

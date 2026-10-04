@@ -1,8 +1,8 @@
 // Wired drafting: parts in a row on a common rail line, nets drawn as real
 // wires by a grid router, one power symbol per rail. Returns null when a net
 // cannot be routed; the caller then falls back to the label style.
-import { POWER_NETS, PWR_FLAG } from "./catalogue";
-import { Attachment, fieldBox, GRID, intersects, naturalDir, PartGeometry, powerSymbolAt, STUB, TextField, VEC } from "./connect";
+import { powerSymbolFor, PWR_FLAG } from "./catalogue";
+import { Attachment, fieldBox, GRID, intersects, naturalDir, PartGeometry, placeFields, powerSymbolAt, STUB, VEC } from "./connect";
 import { groupOrder, Intent, splitPin } from "./intent";
 import { ORIGIN_X, ORIGIN_Y, snapUp } from "./place";
 import { Box, PinDef, PinDir, SymbolDef, SymbolLibrary, unionBox } from "./symbols";
@@ -34,18 +34,7 @@ function buildWiredPart(
   let body = graphics;
   for (const p of pins) body = unionBox(body, { x0: p.x, y0: p.y, x1: p.x, y1: p.y });
 
-  const horizontal = pins.some((p) => p.dir === "L" || p.dir === "R");
-  let reference: TextField;
-  let valueField: TextField;
-  if (!horizontal) {
-    const x = graphics.x1 + GRID;
-    reference = { text: part.ref, x, y: -GRID, justify: "left" };
-    valueField = { text: part.value, x, y: GRID, justify: "left" };
-  } else {
-    const x = (graphics.x0 + graphics.x1) / 2;
-    valueField = { text: part.value, x, y: graphics.y0 - 1.5, justify: "center" };
-    reference = { text: part.ref, x, y: graphics.y0 - 3.5, justify: "center" };
-  }
+  const { reference, valueField } = placeFields(part.ref, part.value, graphics, pins);
 
   let full = unionBox(unionBox(body, fieldBox(reference)), fieldBox(valueField));
   const attachments: Attachment[] = pins.map((pin) => {
@@ -306,6 +295,7 @@ export function routeWires(
     if (terms.length < 2) continue;
     const tree = new Set(terms[0].stub.map(([x, y]) => key(x, y)));
     for (const t of terms.slice(1)) {
+      if (tree.has(key(t.stub[2][0], t.stub[2][1]))) continue; // a pin stacked on one already connected
       const path = connect(net.name, t.stub[2], tree);
       if (!path) return null;
       addPath(net.name, path);
@@ -351,7 +341,7 @@ export function routeWires(
 
   const wiring: Wiring = { wires: [], junctions: [], powers: [], flagTaps: [], box: extent };
   for (const net of intent.nets) {
-    const libId = POWER_NETS[net.name];
+    const libId = powerSymbolFor(net.name, lib);
     if (libId && edges.has(net.name)) {
       const t = tap(net.name, lib.get(libId), net.name);
       if (!t) return null;

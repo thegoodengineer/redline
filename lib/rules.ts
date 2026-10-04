@@ -1,5 +1,5 @@
 // Design rules checked in code on the intent, shown beside ERC.
-import { POWER_NETS } from "./engine/catalogue";
+import { powerSymbolFor } from "./engine/catalogue";
 import { Intent, SymbolLibrary } from "./engine";
 
 export interface RuleResult {
@@ -72,7 +72,7 @@ export function checkRules(intent: Intent, lib: SymbolLibrary): RuleResult[] {
       for (let hop = 0; hop < 8 && !resistor; hop++) {
         const net = netOfPin.get(`${ref}.${pin}`);
         const pins = net ? pinsOfNet.get(net) ?? [] : [];
-        if (!net || POWER_NETS[net] || pins.length !== 2) break;
+        if (!net || powerSymbolFor(net, lib) || pins.length !== 2) break;
         const other = pins.find((p) => p !== `${ref}.${pin}`)!;
         const next = part.get(other.split(".")[0]);
         if (!next) break;

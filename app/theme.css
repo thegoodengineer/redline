@@ -836,3 +836,37 @@ a {
     font-size: 14px;
   }
 }
+
+/* ---------- Review a change: Keep or Undo ---------- */
+.sheet .hit {
+  fill: transparent;
+  cursor: pointer;
+}
+.sheet .hit:hover {
+  fill: rgba(11, 16, 21, 0.06);
+}
+.review {
+  position: absolute;
+  left: 50%;
+  bottom: 16px;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: calc(100% - 32px);
+  padding: 8px 8px 8px 14px;
+  background: var(--bg);
+  border: 1px solid var(--line-strong);
+  font-size: 12px;
+  white-space: nowrap;
+}
+.review .mono {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-right: 6px;
+}
+.review .keep {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #fff;
+}
