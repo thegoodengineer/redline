@@ -42,6 +42,23 @@ export type Turn =
   | { ok: true; meta: VersionMeta; intent: Intent; layout: Layout }
   | { ok: false; reason: "validation"; findings: Finding[]; attempts: number; usage: ModelUsage; ms: number };
 
+/** A question the engineer asked and the model's reply. It creates no new version. */
+export interface Answer {
+  ok: true;
+  /** Shown in the chat after this version. */
+  after: number;
+  question: string;
+  answer: string;
+  model: string;
+  usage: ModelUsage;
+  ms: number;
+}
+
+export function listAnswers(session: string): Answer[] {
+  const file = join(RUNS_DIR, assertSession(session), "answers.json");
+  return existsSync(file) ? JSON.parse(readFileSync(file, "utf8")) : [];
+}
+
 export function assertSession(session: string): string {
   if (!/^[a-z0-9][a-z0-9-]{0,39}$/.test(session)) throw new Error(`bad session id "${session}"`);
   return session;
@@ -142,9 +159,14 @@ export async function generate(session: string, request: string, provider: Model
   return commit(session, "generate", request, provider.model, { ...call, intent: call.intent });
 }
 
-export async function revise(session: string, fromVersion: number, change: string, provider: ModelProvider): Promise<Turn> {
+export async function revise(session: string, fromVersion: number, change: string, provider: ModelProvider): Promise<Turn | Answer> {
   const current = loadIntent(session, fromVersion);
   const call = await reviseIntent(provider, symbolLibrary(), current, change, libraryIndex());
+  if (call.answer !== undefined) {
+    const answer: Answer = { ok: true, after: fromVersion, question: change, answer: call.answer, model: provider.model, usage: call.usage, ms: call.ms };
+    writeFileSync(join(RUNS_DIR, assertSession(session), "answers.json"), JSON.stringify([...listAnswers(session), answer], null, 2) + "\n");
+    return answer;
+  }
   if (!call.ok || !call.intent) {
     return { ok: false, reason: "validation", findings: call.findings, attempts: call.attempts, usage: call.usage, ms: call.ms };
   }

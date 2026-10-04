@@ -74,6 +74,8 @@ export interface IntentCall {
   attempts: number;
   /** For a revision: how many edit operations the model returned (undefined if it sent a whole intent). */
   ops?: number;
+  /** Set when the message was a question: the model's reply in words. No intent is returned then. */
+  answer?: string;
   /** Structural problems that code settled so the sheet could be drawn. Shown to the engineer as warnings. */
   repairs?: Repair[];
   usage: ModelUsage;
@@ -99,6 +101,10 @@ async function callForIntent(provider: ModelProvider, lib: SymbolLibrary, user: 
       candidate = undefined;
     }
     let ops: number | undefined;
+    if (current && candidate && typeof candidate === "object" && !("ops" in candidate) && !("parts" in candidate)) {
+      const answer = (candidate as { answer?: unknown }).answer;
+      if (typeof answer === "string" && answer.trim()) return { ok: true, answer: answer.trim(), findings: [], attempts: attempt, usage, ms };
+    }
     if (candidate !== undefined && current && typeof candidate === "object" && candidate !== null && "ops" in candidate) {
       // Edit operations: apply them in code to the current intent, then validate the result as usual.
       const parsed = OpsSchema.safeParse(candidate);
@@ -165,7 +171,9 @@ ${JSON.stringify(current)}
 CHANGE REQUEST
 ${change}
 
-For a change request do not return the whole intent. ${OPS_HELP}`,
+If the message above is a question about this design rather than a request to change it (why a value was chosen, what a pin or part does, whether something is safe), do not edit anything. Return {"answer": "..."} instead: plain text, under 120 words, specific to this design, and say so plainly when you are not sure.
+
+Otherwise it is a change request. Do not return the whole intent. ${OPS_HELP}`,
     [...new Set([...inUse, ...lookUp(index, change)])],
     index,
     current,

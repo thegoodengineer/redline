@@ -54,7 +54,10 @@ flowchart LR
    `set_value`, `set_symbol`, `connect`, `no_connect`, `rename_net`), and code applies them (`lib/ops.ts`). What
    the operations do not mention cannot change. The result is validated, drafted and checked like a first draft,
    and the difference is shown on the sheet: added parts green, changed parts amber, removed parts listed.
-6. **Review.** Every change shows a bar with what it did and two buttons, Keep and Undo. Clicking a part on the
+6. **Ask.** A question ("why does the regulator need capacitors?") gets an answer in the chat instead of an edit:
+   the model replies in words, no new version is created, and the answer is labelled as coming from the model and
+   not checked.
+7. **Review.** Every change shows a bar with what it did and two buttons, Keep and Undo. Clicking a part on the
    sheet puts its ref in the chat box, so "R3: make this 4.7k" needs no typing of names. ERC and design-rule
    findings are shown to you, never fixed silently.
 

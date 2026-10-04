@@ -85,6 +85,15 @@ describe("edit operations", () => {
     expect(p.prompts[0]).toContain('"op":"add_part"');
   });
 
+  it("a question gets an answer and no edit", async () => {
+    const p = scripted(['{"answer": "C2 is 22uF because the AMS1117 datasheet asks for it on the output."}']);
+    const r = await reviseIntent(p, lib, base, "Why is C2 22uF?");
+    expect(r.ok).toBe(true);
+    expect(r.answer).toBe("C2 is 22uF because the AMS1117 datasheet asks for it on the output.");
+    expect(r.intent).toBeUndefined();
+    expect(p.prompts[0]).toContain('Return {"answer": "..."}');
+  });
+
   it("revise retries when the edited design does not validate, and still accepts a whole intent", async () => {
     // D1.1 left unconnected and R1.1 put on a second net: needs the model, so it gets a retry
     const incomplete: Op[] = [...ADD_LED.slice(0, 4), { op: "add_part", ref: "R1", libId: "Device:R", value: "1k", group: "output" }];

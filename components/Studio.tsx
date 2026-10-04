@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Finding } from "@/lib/engine";
 import type { VersionPayload } from "@/lib/payload";
-import type { Check, Turn } from "@/lib/session";
+import type { Answer, Check, Turn } from "@/lib/session";
 import Sheet, { Mark } from "./Sheet";
 
 const EXAMPLES = [
@@ -47,6 +47,7 @@ export default function Studio() {
   const [busy, setBusy] = useState<{ text: string; since: number; action: Action["action"] } | null>(null);
   const [elapsed, setElapsed] = useState(0);
   const [failures, setFailures] = useState<Failure[]>([]);
+  const [answers, setAnswers] = useState<Answer[]>([]);
   const [draft, setDraft] = useState("");
   const [hover, setHover] = useState<string | null>(null);
   /** The version just produced by a change, waiting for Keep or Undo. */
@@ -67,6 +68,7 @@ export default function Studio() {
       .then(async (r) => {
         const body = await r.json();
         if (!r.ok) throw new Error(body.error ?? `HTTP ${r.status}`);
+        if (!demo) setAnswers(body.answers ?? []);
         return body.versions as VersionPayload[];
       })
       .then((v) => {
@@ -151,8 +153,14 @@ export default function Studio() {
               ? { action: a.action, session: sid, version: from, text: a.text }
               : { action: a.action, session: sid, version: from, checkIds: a.checkIds };
         const r = await fetch("/api/turn", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
-        const turn = (await r.json()) as Turn | { error: string };
+        const turn = (await r.json()) as Turn | Answer | { error: string };
         if ("error" in turn) return fail("Request failed", [], turn.error);
+        if ("answer" in turn) {
+          // A question: the model answered in words and nothing on the sheet changed.
+          setAnswers((a) => [...a, turn]);
+          setDraft("");
+          return;
+        }
         if (!turn.ok) return fail(`Rejected by the validator after ${turn.attempts} attempts. Nothing was written.`, turn.findings);
         const fresh = await fetch(`/api/session/${sid}`).then((x) => x.json());
         setVersions(visible(fresh.versions));
@@ -308,6 +316,7 @@ export default function Studio() {
                   setVersions([]);
                   setCurrent(null);
                   setFailures([]);
+                  setAnswers([]);
                   router.replace(demo ? "/studio?demo=1" : "/studio");
                 }}
               >
@@ -377,6 +386,28 @@ export default function Studio() {
                       </div>
                     </>
                   )}
+                  {answers
+                    .filter((a) => a.after === ver)
+                    .map((a, i) => (
+                      <div key={`answer-${i}`}>
+                        <div className="entry">
+                          <div className="who">
+                            <span className="label">You</span>
+                          </div>
+                          <p>{a.question}</p>
+                        </div>
+                        <div className="entry result answer">
+                          <div className="who">
+                            <span className="label">Redline · answer</span>
+                            <span className="label">{(a.ms / 1000).toFixed(1)} s</span>
+                          </div>
+                          <p>{a.answer}</p>
+                          <ul className="facts">
+                            <li>from {a.model}, not checked · no change to v{a.after}</li>
+                          </ul>
+                        </div>
+                      </div>
+                    ))}
                   {failures
                     .filter((f) => f.after === ver)
                     .map((f, i) => (
@@ -421,7 +452,7 @@ export default function Studio() {
             <textarea
               ref={composer}
               value={draft}
-              placeholder={demo ? "End of the recorded session." : payload ? `Ask for a change to v${payload.meta.version}…` : "Describe the circuit…"}
+              placeholder={demo ? "End of the recorded session." : payload ? `Ask for a change to v${payload.meta.version}, or ask a question…` : "Describe the circuit…"}
               disabled={!!busy}
               readOnly={demo}
               onChange={(e) => setDraft(e.target.value)}
@@ -435,7 +466,7 @@ export default function Studio() {
             <div className="row">
               <span className="label">{demo ? "No API calls" : payload ? `Revises v${payload.meta.version}` : "Enter to send"}</span>
               <button className="btn primary" disabled={!!busy || (demo ? !next : draft.trim().length < 3)} onClick={submit}>
-                {busy ? "Working…" : demo ? (next ? `Replay v${next.meta.version}` : "End of demo") : payload ? "Revise" : "Draft schematic"}
+                {busy ? "Working…" : demo ? (next ? `Replay v${next.meta.version}` : "End of demo") : payload ? "Send" : "Draft schematic"}
               </button>
             </div>
           </div>
@@ -521,7 +552,7 @@ export default function Studio() {
             {busy && (
               <div className={`state${payload ? " over" : ""}`}>
                 <div className="panel">
-                  <span className="label">{busy.action === "generate" ? "Drafting" : "Revising"}</span>
+                  <span className="label">{busy.action === "generate" ? "Drafting" : "Working on it"}</span>
                   <h2 className="mono">{elapsed} s</h2>
                   <p>
                     {demo && next

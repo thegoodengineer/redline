@@ -74,7 +74,12 @@ async function main() {
       if (!allClean(row.first)) {
         await sleep(delay);
         const failing = first.ok ? first.meta.checks.filter((c) => c.status !== "pass") : [];
-        const fixed = await attempt(() => (first.ok ? revise(session, 1, fixRequest(failing), provider) : generate(session, prompt, provider)));
+        const reply = await attempt(async () => {
+          const t = first.ok ? await revise(session, 1, fixRequest(failing), provider) : await generate(session, prompt, provider);
+          // An answer in words instead of a fix counts as no fix.
+          return "answer" in t ? ({ ok: false, reason: "validation", findings: [], attempts: 1, usage: t.usage, ms: t.ms } as Turn) : t;
+        });
+        const fixed = reply;
         row.fixRound = summarize(fixed);
         if (fixed.ok && GOLDEN[i]) row.goldenAfterFix = matchGolden(fixed.intent, GOLDEN[i]);
         console.log(

@@ -5,9 +5,14 @@
 import { GemmaProvider } from "../lib/model/provider";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { fixRequest, generate, listVersions, revise, Turn, versionDir, VersionMeta } from "../lib/session";
+import { Answer, fixRequest, generate, listVersions, revise, Turn, versionDir, VersionMeta } from "../lib/session";
 
-function print(turn: Turn) {
+function print(turn: Turn | Answer) {
+  if ("answer" in turn) {
+    console.log(`ANSWER (no change made), ${turn.usage.totalTokens} tokens, ${turn.ms} ms`);
+    console.log(turn.answer);
+    return;
+  }
   if (!turn.ok) {
     console.log(`REJECTED after ${turn.attempts} attempt(s), nothing written. ${turn.usage.totalTokens} tokens, ${turn.ms} ms`);
     for (const f of turn.findings) console.log(`  ${f.id}. [${f.code}] ${f.message}`);
