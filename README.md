@@ -57,7 +57,11 @@ flowchart LR
 6. **Ask.** A question ("why does the regulator need capacitors?") gets an answer in the chat instead of an edit:
    the model replies in words, no new version is created, and the answer is labelled as coming from the model and
    not checked.
-7. **Review.** Every change shows a bar with what it did and two buttons, Keep and Undo. Clicking a part on the
+7. **Explain the sheet.** Under the checks, "Short forms on this sheet" lists what every abbreviation in the
+   drawing means: part letters (U, R, C, J), rails (`+3V3`, `GND`), pin names (`EN`, `NC`, `VIN`), value suffixes
+   (`1u`, `10k`) and marks (`PWR_FLAG`). It comes from a fixed dictionary in `lib/glossary.ts`, not from the model,
+   and only lists terms the sheet uses.
+8. **Review.** Every change shows a bar with what it did and two buttons, Keep and Undo. Clicking a part on the
    sheet puts its ref in the chat box, so "R3: make this 4.7k" needs no typing of names. ERC and design-rule
    findings are shown to you, never fixed silently.
 

@@ -870,3 +870,27 @@ a {
   border-color: var(--ink);
   color: #fff;
 }
+
+/* ---------- Short forms ---------- */
+.glossary dl {
+  margin: 0;
+  padding: 10px 16px 4px;
+  border-bottom: 1px solid var(--line);
+}
+.glossary dt {
+  margin-bottom: 6px;
+}
+.glossary .term {
+  display: grid;
+  grid-template-columns: 92px 1fr;
+  gap: 10px;
+  padding: 4px 0;
+  font-size: 13px;
+}
+.glossary .term .mono {
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+.glossary .term span + span {
+  color: var(--ink-2);
+}

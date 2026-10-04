@@ -3,6 +3,7 @@
 // Usage: npx tsx scripts/redraft.ts <session>
 import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+import { glossary } from "../lib/glossary";
 import { checkRules } from "../lib/rules";
 import { runDraft, symbolLibrary } from "../lib/runs";
 import { buildChecks, listVersions, loadIntent, versionDir, VersionMeta } from "../lib/session";
@@ -20,6 +21,7 @@ async function main() {
     // keep the auto-repair notes recorded when the version was first drafted
     const kept = meta.checks.filter((c) => c.type === "auto_repair").map((c) => ({ message: c.message.replace(/^Auto-repaired: /, ""), refs: c.refs }));
     meta.checks = buildChecks(run.erc, run.layout, checkRules(run.intent, symbolLibrary()), kept);
+    meta.glossary = glossary(run.intent, symbolLibrary(), run.layout.flags.length > 0);
     writeFileSync(metaPath, JSON.stringify(meta, null, 2) + "\n");
     console.log(`${session} v${v}: ERC ${run.erc.errors} errors, ${run.erc.warnings} warnings, ${meta.checks.filter((c) => c.status !== "pass").length} failing checks`);
   }

@@ -7,6 +7,7 @@ import { ErcReport } from "./kicad/cli";
 import { generateIntent, IntentCall, reviseIntent } from "./model/calls";
 import { ModelProvider, ModelUsage } from "./model/provider";
 import { checkRules, RuleResult } from "./rules";
+import { glossary, GlossaryEntry } from "./glossary";
 import type { Repair } from "./engine/repair";
 import { libraryIndex, RUNS_DIR, runDraft, symbolLibrary } from "./runs";
 
@@ -36,6 +37,8 @@ export interface VersionMeta {
   erc: { errors: number; warnings: number; kicadVersion: string };
   checks: Check[];
   diff?: IntentDiff;
+  /** Meanings of the short forms used on this sheet. */
+  glossary?: GlossaryEntry[];
 }
 
 export type Turn =
@@ -145,6 +148,7 @@ async function commit(
     erc: { errors: run.erc.errors, warnings: run.erc.warnings, kicadVersion: run.erc.kicadVersion },
     checks: buildChecks(run.erc, run.layout, checkRules(run.intent, symbolLibrary()), call.repairs),
     diff: previous ? diffIntent(previous, run.intent) : undefined,
+    glossary: glossary(run.intent, symbolLibrary(), run.layout.flags.length > 0),
   };
   writeFileSync(join(run.dir, "meta.json"), JSON.stringify(meta, null, 2) + "\n");
   return { ok: true, meta, intent: run.intent, layout: run.layout };

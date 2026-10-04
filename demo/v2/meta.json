@@ -99,5 +99,97 @@
       ]
     },
     "same": false
-  }
+  },
+  "glossary": [
+    {
+      "group": "Parts",
+      "term": "J1, J2, …",
+      "meaning": "connector"
+    },
+    {
+      "group": "Parts",
+      "term": "C1, C2, …",
+      "meaning": "capacitor"
+    },
+    {
+      "group": "Parts",
+      "term": "F1, F2, …",
+      "meaning": "fuse"
+    },
+    {
+      "group": "Parts",
+      "term": "U1, U2, …",
+      "meaning": "integrated circuit (a chip, such as a regulator or microcontroller)"
+    },
+    {
+      "group": "Parts",
+      "term": "R1, R2, …",
+      "meaning": "resistor"
+    },
+    {
+      "group": "Parts",
+      "term": "D1, D2, …",
+      "meaning": "diode or LED"
+    },
+    {
+      "group": "Rails",
+      "term": "+5V",
+      "meaning": "5 V supply rail"
+    },
+    {
+      "group": "Rails",
+      "term": "GND",
+      "meaning": "ground, the 0 V reference every voltage is measured against"
+    },
+    {
+      "group": "Rails",
+      "term": "+3V3",
+      "meaning": "3.3 V supply rail (the V stands where the decimal point is)"
+    },
+    {
+      "group": "Pins",
+      "term": "Pin_1, Pin_2, …",
+      "meaning": "connector pins, numbered"
+    },
+    {
+      "group": "Values",
+      "term": "u, uF",
+      "meaning": "microfarad, a millionth of a farad (capacitor value)"
+    },
+    {
+      "group": "Values",
+      "term": "mA",
+      "meaning": "milliamp, a thousandth of an amp"
+    },
+    {
+      "group": "Pins",
+      "term": "GND",
+      "meaning": "ground pin"
+    },
+    {
+      "group": "Pins",
+      "term": "VO",
+      "meaning": "output"
+    },
+    {
+      "group": "Pins",
+      "term": "VI",
+      "meaning": "voltage input"
+    },
+    {
+      "group": "Pins",
+      "term": "K",
+      "meaning": "cathode, the negative end of a diode or LED"
+    },
+    {
+      "group": "Pins",
+      "term": "A",
+      "meaning": "anode, the positive end of a diode or LED"
+    },
+    {
+      "group": "Marks",
+      "term": "PWR_FLAG",
+      "meaning": "tells KiCad's rule check that a net is powered from outside the sheet; it is not a real part"
+    }
+  ]
 }

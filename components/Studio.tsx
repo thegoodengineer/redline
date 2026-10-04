@@ -659,6 +659,28 @@ export default function Studio() {
                   })}
                 </div>
               ))}
+            {payload?.meta.glossary && payload.meta.glossary.length > 0 && (
+              <div className="glossary">
+                <div className="group">
+                  <span className="label">Short forms on this sheet</span>
+                </div>
+                {(["Parts", "Rails", "Pins", "Values", "Marks"] as const).map((group) => {
+                  const rows = payload.meta.glossary!.filter((g) => g.group === group);
+                  if (!rows.length) return null;
+                  return (
+                    <dl key={group}>
+                      <dt className="label">{group}</dt>
+                      {rows.map((g) => (
+                        <div key={g.term} className="term">
+                          <span className="mono">{g.term}</span>
+                          <span>{g.meaning}</span>
+                        </div>
+                      ))}
+                    </dl>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </section>
       </div>
