@@ -1,0 +1,16 @@
+[
+  {
+    "ok": true,
+    "after": 1,
+    "question": "Why does the regulator need a capacitor on its input and on its output?",
+    "answer": "The input capacitor (C1) filters noise from the +5V supply and provides a local energy reservoir to prevent voltage dips during load transients. The output capacitor (C2) is critical for the AMS1117's stability; without it, the regulator can oscillate, causing the output voltage to ripple or become unstable. The 22uF value for C2 specifically follows the AMS1117 datasheet recommendation to ensure a stable 3.3V output.",
+    "model": "gemma-4-31b-it",
+    "usage": {
+      "promptTokens": 2533,
+      "outputTokens": 103,
+      "thoughtTokens": 0,
+      "totalTokens": 2636
+    },
+    "ms": 41922
+  }
+]

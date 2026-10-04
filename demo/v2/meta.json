@@ -1,20 +1,21 @@
 {
-  "session": "live",
+  "session": "film",
   "version": 2,
   "kind": "revise",
-  "request": "Remove capacitor C2. Add a polyfuse between the input connector and the regulator input.",
+  "request": "Add a green power LED with its series resistor on the 3.3 V output.",
   "model": "gemma-4-31b-it",
   "attempts": 1,
+  "ops": 5,
   "usage": {
-    "promptTokens": 1421,
-    "outputTokens": 484,
+    "promptTokens": 2398,
+    "outputTokens": 123,
     "thoughtTokens": 0,
-    "totalTokens": 1905
+    "totalTokens": 2521
   },
-  "ms": 36068,
+  "ms": 23415,
   "bytes": {
-    "intent": 1593,
-    "schematic": 52343
+    "intent": 1479,
+    "schematic": 47215
   },
   "erc": {
     "errors": 0,
@@ -33,21 +34,23 @@
     {
       "id": "rule-1",
       "source": "rule",
-      "status": "fail",
+      "status": "pass",
       "type": "reg_input_cap",
-      "message": "U1 has no capacitor from its input (VIN) to GND",
+      "message": "U1 input (+5V) has C1 to GND",
       "refs": [
-        "U1"
+        "U1",
+        "C1"
       ]
     },
     {
       "id": "rule-2",
       "source": "rule",
-      "status": "fail",
+      "status": "pass",
       "type": "reg_output_cap",
-      "message": "U1 has no capacitor from its output (+3V3) to GND",
+      "message": "U1 output (+3V3) has C2 to GND",
       "refs": [
-        "U1"
+        "U1",
+        "C2"
       ]
     },
     {
@@ -55,7 +58,7 @@
       "source": "rule",
       "status": "pass",
       "type": "reg_rails_differ",
-      "message": "U1 input VIN and output +3V3 are different nets",
+      "message": "U1 input +5V and output +3V3 are different nets",
       "refs": [
         "U1"
       ]
@@ -74,26 +77,17 @@
   ],
   "diff": {
     "added": [
-      "F1"
+      "R1",
+      "D1"
     ],
-    "removed": [
-      "C2"
-    ],
-    "changed": [
-      {
-        "ref": "U1",
-        "what": [
-          "pin 3 now on VIN"
-        ]
-      }
-    ],
+    "removed": [],
+    "changed": [],
     "nets": {
       "added": [
-        "VIN"
+        "LED_A"
       ],
       "removed": [],
       "changed": [
-        "+5V",
         "GND",
         "+3V3"
       ]
@@ -110,11 +104,6 @@
       "group": "Parts",
       "term": "C1, C2, …",
       "meaning": "capacitor"
-    },
-    {
-      "group": "Parts",
-      "term": "F1, F2, …",
-      "meaning": "fuse"
     },
     {
       "group": "Parts",
@@ -147,19 +136,9 @@
       "meaning": "3.3 V supply rail (the V stands where the decimal point is)"
     },
     {
-      "group": "Pins",
-      "term": "Pin_1, Pin_2, …",
-      "meaning": "connector pins, numbered"
-    },
-    {
       "group": "Values",
       "term": "u, uF",
       "meaning": "microfarad, a millionth of a farad (capacitor value)"
-    },
-    {
-      "group": "Values",
-      "term": "mA",
-      "meaning": "milliamp, a thousandth of an amp"
     },
     {
       "group": "Pins",
@@ -175,6 +154,11 @@
       "group": "Pins",
       "term": "VI",
       "meaning": "voltage input"
+    },
+    {
+      "group": "Values",
+      "term": "k",
+      "meaning": "kilo-ohm, a thousand ohms (resistor value)"
     },
     {
       "group": "Pins",

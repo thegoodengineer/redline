@@ -1,0 +1,173 @@
+<!doctype html>
+<!-- Redline demo film: motion-graphics scenes. One 1920x1080 page, scene chosen with ?scene=<id>.
+     Same palette and fonts as app/theme.css. Every number is fetched from the repo at render time.
+     Animations wait for body.go, which the renderer adds once fonts and data are ready
+     (open with ?scene=x in a browser and they start by themselves). -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Redline film scenes</title>
+<style>
+  @font-face { font-family: Geist; src: url("fonts/Geist-Variable.woff2") format("woff2"); font-weight: 100 900; }
+  @font-face { font-family: "Geist Mono"; src: url("fonts/GeistMono-Variable.woff2") format("woff2"); font-weight: 100 900; }
+  :root { --ink: #0b1015; --ink-2: rgba(11,16,21,.68); --ink-3: rgba(11,16,21,.44); --line: rgba(9,17,32,.14);
+          --surface: #f4f4f6; --accent: #0562ef; --fail: #d1242f; --pass: #1a7f37; }
+  html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: #fff; color: var(--ink);
+               font-family: Geist, system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  .scene { display: none; position: absolute; inset: 0; padding: 110px 150px; box-sizing: border-box; flex-direction: column; justify-content: center; }
+  .mono { font-family: "Geist Mono", ui-monospace, monospace; font-variant-numeric: tabular-nums; }
+  .label { font-family: "Geist Mono", monospace; font-size: 26px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
+  h1 { margin: 0; font-size: 118px; font-weight: 400; line-height: 1.08; letter-spacing: -.035em; }
+  h2 { margin: 26px 0 0; font-size: 62px; font-weight: 400; line-height: 1.14; letter-spacing: -.03em; max-width: 1500px; }
+  p { margin: 26px 0 0; font-size: 40px; line-height: 1.4; color: var(--ink-2); }
+
+  /* Entrances. Paused until the renderer says go. */
+  .in { opacity: 0; transform: translateY(26px); }
+  body.go .in { animation: up .75s cubic-bezier(.2,.7,.2,1) forwards; animation-delay: var(--d, 0s); }
+  @keyframes up { to { opacity: 1; transform: none; } }
+  .rule { height: 3px; background: var(--ink); width: 0; margin-top: 44px; }
+  body.go .rule { animation: grow 1.1s cubic-bezier(.2,.7,.2,1) forwards; animation-delay: var(--d, .4s); }
+  @keyframes grow { to { width: 100%; } }
+
+  /* cold */
+  #cold h1 + h1 { margin-top: 18px; }
+  #cold h1:last-child { color: var(--accent); }
+
+  /* problem */
+  #problem { flex-direction: row; align-items: center; gap: 90px; }
+  .file { flex: 0 0 900px; height: 760px; border: 2px solid var(--line); overflow: hidden; position: relative; }
+  .file pre { margin: 0; padding: 30px 36px; font-family: "Geist Mono", monospace; font-size: 25px; line-height: 1.55; color: var(--ink-2); }
+  body.go .file pre { animation: scroll 13s linear forwards; }
+  @keyframes scroll { to { transform: translateY(-1500px); } }
+  .file::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 120px; background: rgba(255,255,255,.86); }
+  .big { font-family: Geist, sans-serif; font-variant-numeric: tabular-nums; font-size: 190px; font-weight: 500; letter-spacing: -.04em; line-height: 1; }
+  .warn { color: var(--fail); }
+
+  /* title and close */
+  .name { font-size: 250px; font-weight: 600; letter-spacing: -.05em; line-height: 1; }
+  .chip { display: inline-block; font-family: "Geist Mono", monospace; font-size: 30px; padding: 8px 18px; border: 2px solid var(--line); margin: 34px 14px 0 0; }
+  .chip.url { border-color: var(--ink); }
+
+  /* flow */
+  #flow svg { width: 1620px; height: 560px; margin-top: 50px; }
+  #flow .box rect { fill: #fff; stroke: var(--ink); stroke-width: 2.5; }
+  #flow .box.model rect { stroke: var(--accent); stroke-width: 4; }
+  #flow .box.judge rect { stroke: var(--pass); stroke-width: 4; }
+  #flow .kind { font-family: "Geist Mono", monospace; font-size: 19px; letter-spacing: .08em; fill: rgba(11,16,21,.44); }
+  #flow .name2 { font-size: 34px; font-weight: 500; letter-spacing: -.02em; fill: var(--ink); }
+  #flow .what { font-size: 23px; fill: rgba(11,16,21,.68); }
+  #flow .wire { stroke: var(--ink-3); stroke-width: 2.5; fill: none; }
+  #flow .box, #flow .arrow { opacity: 0; }
+  body.go #flow .box, body.go #flow .arrow { animation: fade .6s ease forwards; animation-delay: var(--d, 0s); }
+  @keyframes fade { to { opacity: 1; } }
+  #flow .dot { fill: var(--accent); opacity: 0; }
+  body.go #flow .dot { animation: travel 1.5s linear infinite; animation-delay: var(--d, 0s); }
+  @keyframes travel { 0% { opacity: 0; transform: translateX(0); } 12% { opacity: 1; } 88% { opacity: 1; } 100% { opacity: 0; transform: translateX(58px); } }
+
+  /* proof */
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); margin-top: 60px; border-top: 3px solid var(--ink); }
+  .grid > div { padding: 34px 36px 0 0; }
+  .grid > div + div { padding-left: 36px; border-left: 2px solid var(--line); }
+  .num { font-family: "Geist Mono", monospace; font-size: 150px; font-weight: 500; letter-spacing: -.05em; line-height: 1.05; }
+  .num.pass { color: var(--pass); }
+  .cap { font-size: 33px; color: var(--ink); margin-top: 10px; line-height: 1.3; }
+  .src { font-family: "Geist Mono", monospace; font-size: 22px; color: var(--ink-3); margin-top: 14px; }
+</style>
+</head>
+<body>
+
+<section class="scene" id="cold">
+  <h1 class="in" style="--d:.2s">Software students.</h1>
+  <h1 class="in" style="--d:1.6s">Australian Rover Challenge.</h1>
+  <h1 class="in" style="--d:3.2s">We had to build a schematic.</h1>
+</section>
+
+<section class="scene" id="problem">
+  <div class="file in" style="--d:.1s"><pre id="sch"></pre></div>
+  <div>
+    <span class="label in" style="--d:.5s">design.kicad_sch</span>
+    <div class="big in" style="--d:.9s" id="bytes">–</div>
+    <p class="in" style="--d:1.4s">bytes of exact coordinates in one small schematic.</p>
+    <h2 class="in warn" style="--d:5.6s">One wrong number,<br>and a pin floats.</h2>
+  </div>
+</section>
+
+<section class="scene" id="title">
+  <span class="label in" style="--d:.1s">KiCad schematics from a description</span>
+  <div class="name in" style="--d:.3s">Redline</div>
+  <div class="rule" style="--d:.9s"></div>
+  <h2 class="in" style="--d:1.6s">Describe a circuit. Get a real KiCad schematic.</h2>
+</section>
+
+<section class="scene" id="flow">
+  <span class="label in" style="--d:.1s">How it works</span>
+  <svg viewBox="0 0 1620 560">
+    <!-- five boxes, 276 wide, 60 apart -->
+    <g class="box model" style="--d:.4s"><rect x="0" y="120" width="276" height="250"/>
+      <text class="kind" x="24" y="162">MODEL</text><text class="name2" x="24" y="212">Gemma 4</text>
+      <text class="what" x="24" y="258">writes the intent:</text><text class="what" x="24" y="290">parts and nets,</text><text class="what" x="24" y="322">no coordinates</text></g>
+    <g class="arrow" style="--d:2.2s"><path class="wire" d="M276 245 H336"/><circle class="dot" cx="278" cy="245" r="7" style="--d:2.4s"/></g>
+    <g class="box" style="--d:2.6s"><rect x="336" y="120" width="276" height="250"/>
+      <text class="kind" x="360" y="162">CODE</text><text class="name2" x="360" y="212">Validator</text>
+      <text class="what" x="360" y="258">checks every pin</text><text class="what" x="360" y="290">and symbol, one</text><text class="what" x="360" y="322">retry, then repair</text></g>
+    <g class="arrow" style="--d:3.6s"><path class="wire" d="M612 245 H672"/><circle class="dot" cx="614" cy="245" r="7" style="--d:3.8s"/></g>
+    <g class="box" style="--d:4s"><rect x="672" y="120" width="276" height="250"/>
+      <text class="kind" x="696" y="162">CODE</text><text class="name2" x="696" y="212">Engine</text>
+      <text class="what" x="696" y="258">places symbols,</text><text class="what" x="696" y="290">routes wires, writes</text><text class="what" x="696" y="322">the .kicad_sch</text></g>
+    <g class="arrow" style="--d:6s"><path class="wire" d="M948 245 H1008"/><circle class="dot" cx="950" cy="245" r="7" style="--d:6.2s"/></g>
+    <g class="box judge" style="--d:6.4s"><rect x="1008" y="120" width="276" height="250"/>
+      <text class="kind" x="1032" y="162">KICAD</text><text class="name2" x="1032" y="212">kicad-cli</text>
+      <text class="what" x="1032" y="258">runs its own rule</text><text class="what" x="1032" y="290">check and draws</text><text class="what" x="1032" y="322">the sheet</text></g>
+    <g class="arrow" style="--d:8s"><path class="wire" d="M1284 245 H1344"/><circle class="dot" cx="1286" cy="245" r="7" style="--d:8.2s"/></g>
+    <g class="box" style="--d:8.3s"><rect x="1344" y="120" width="276" height="250"/>
+      <text class="kind" x="1368" y="162">YOU</text><text class="name2" x="1368" y="212">Studio</text>
+      <text class="what" x="1368" y="258">findings on the</text><text class="what" x="1368" y="290">sheet; change it or</text><text class="what" x="1368" y="322">ask it, by chat</text></g>
+    <!-- the loop back: a change or a fix goes to the model again -->
+    <g class="arrow" style="--d:9.1s"><path class="wire" d="M1482 370 V470 H138 V376" stroke-dasharray="8 8"/>
+      <text class="kind" x="700" y="505">A CHANGE OR A FIX GOES BACK AS SMALL EDITS</text></g>
+  </svg>
+</section>
+
+<section class="scene" id="proof">
+  <span class="label in" style="--d:.1s">Measured, not claimed</span>
+  <div class="grid">
+    <div class="in" style="--d:1s"><div class="num pass" id="erc">–</div><div class="cap">test prompts passed KiCad's rule check first time</div><div class="src">data/eval-results.json</div></div>
+    <div class="in" style="--d:4.8s"><div class="num pass" id="golden">–</div><div class="cap">matched a hand-written reference circuit</div><div class="src">data/golden.ts</div></div>
+    <div class="in" style="--d:8s"><div class="num" id="tests">–</div><div class="cap">tests, run against the real kicad-cli</div><div class="src">npx vitest run</div></div>
+  </div>
+</section>
+
+<section class="scene" id="close">
+  <div class="name in" style="--d:.2s; font-size: 220px">Redline</div>
+  <div class="rule" style="--d:.7s"></div>
+  <h2 class="in" style="--d:1.3s">Describe it. Draw it. Check it.</h2>
+  <div class="in" style="--d:2.6s"><span class="chip url">github.com/thegoodengineer/redline</span><span class="chip">Gemma 4</span><span class="chip">KiCad 10</span><span class="chip">MIT</span></div>
+</section>
+
+<script>
+  const q = new URLSearchParams(location.search);
+  const id = q.get("scene") || "title";
+  document.getElementById(id).style.display = "flex";
+  const json = (u) => fetch(u).then((r) => r.json());
+  const text = (u) => fetch(u).then((r) => r.text());
+
+  async function fill() {
+    if (id === "problem") {
+      const sch = (await text("/demo/v1/design.kicad_sch")).replace(/\r/g, "");
+      const from = sch.indexOf("\n\t(wire");
+      document.getElementById("sch").textContent = sch.slice(from + 1).split("\n").slice(0, 110).map((l) => l.replace(/^\t/, "").replace(/\t/g, "  ")).join("\n");
+      document.getElementById("bytes").textContent = (await json("/demo/v1/meta.json")).bytes.schematic.toLocaleString("en-US");
+    }
+    if (id === "proof") {
+      const e = await json("/data/eval-results.json");
+      document.getElementById("erc").textContent = `${e.ercCleanFirst}/${e.prompts}`;
+      document.getElementById("golden").textContent = `${e.goldenFirst}/${e.prompts}`;
+      document.getElementById("tests").textContent = (await text("/video/assets/tests.txt")).trim();
+    }
+  }
+  window.sceneReady = Promise.all([fill(), document.fonts.ready]).then(() => true);
+  // Started by the renderer; when opened by hand, start after the data is in.
+  if (!q.get("hold")) window.sceneReady.then(() => document.body.classList.add("go"));
+</script>
+</body>
+</html>

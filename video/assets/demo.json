@@ -1,0 +1,78 @@
+{
+  "draft": {
+    "offset": 1.75,
+    "length": 9.65,
+    "events": [
+      {
+        "t": 1.9,
+        "label": "send"
+      },
+      {
+        "t": 3.83,
+        "label": "sheet"
+      },
+      {
+        "t": 7.04,
+        "label": "checks"
+      }
+    ]
+  },
+  "ask": {
+    "offset": 1.92,
+    "length": 9.6,
+    "events": [
+      {
+        "t": 1.71,
+        "label": "send"
+      },
+      {
+        "t": 3.68,
+        "label": "answer"
+      },
+      {
+        "t": 5.38,
+        "label": "short-forms"
+      }
+    ]
+  },
+  "edit": {
+    "offset": 1.85,
+    "length": 10.28,
+    "events": [
+      {
+        "t": 1.71,
+        "label": "send"
+      },
+      {
+        "t": 3.68,
+        "label": "review"
+      },
+      {
+        "t": 8.04,
+        "label": "keep"
+      }
+    ]
+  },
+  "fix": {
+    "offset": 2.07,
+    "length": 12.03,
+    "events": [
+      {
+        "t": 0.9,
+        "label": "send"
+      },
+      {
+        "t": 3.37,
+        "label": "fail"
+      },
+      {
+        "t": 5.84,
+        "label": "fix"
+      },
+      {
+        "t": 9.02,
+        "label": "pass"
+      }
+    ]
+  }
+}

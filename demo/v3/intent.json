@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "title": "5V to 3.3V Regulator with Indicator",
+  "title": "5V to 3.3V Regulator",
   "parts": [
     {
       "ref": "J1",
@@ -10,21 +10,9 @@
     },
     {
       "ref": "C1",
-      "libId": "Device:C_Polarized",
+      "libId": "Device:C",
       "value": "10uF",
       "group": "input"
-    },
-    {
-      "ref": "F1",
-      "libId": "Device:Polyfuse",
-      "value": "500mA",
-      "group": "input"
-    },
-    {
-      "ref": "C2",
-      "libId": "Device:C_Polarized",
-      "value": "10uF",
-      "group": "regulator"
     },
     {
       "ref": "U1",
@@ -33,28 +21,22 @@
       "group": "regulator"
     },
     {
-      "ref": "C3",
-      "libId": "Device:C_Polarized",
-      "value": "10uF",
-      "group": "regulator"
-    },
-    {
-      "ref": "J2",
-      "libId": "Connector_Generic:Conn_01x02",
-      "value": "3V3_OUT",
-      "group": "output"
-    },
-    {
       "ref": "R1",
       "libId": "Device:R",
-      "value": "330",
-      "group": "indicator"
+      "value": "1k",
+      "group": "output"
     },
     {
       "ref": "D1",
       "libId": "Device:LED",
       "value": "GREEN",
-      "group": "indicator"
+      "group": "output"
+    },
+    {
+      "ref": "J2",
+      "libId": "Connector_Generic:Conn_01x02",
+      "value": "3.3V_OUT",
+      "group": "output"
     }
   ],
   "nets": [
@@ -62,16 +44,8 @@
       "name": "+5V",
       "pins": [
         "J1.1",
-        "F1.1",
-        "C1.1"
-      ]
-    },
-    {
-      "name": "VIN",
-      "pins": [
-        "F1.2",
-        "U1.3",
-        "C2.1"
+        "C1.1",
+        "U1.3"
       ]
     },
     {
@@ -79,9 +53,7 @@
       "pins": [
         "J1.2",
         "C1.2",
-        "C2.2",
         "U1.1",
-        "C3.2",
         "J2.2",
         "D1.1"
       ]
@@ -91,8 +63,7 @@
       "pins": [
         "U1.2",
         "J2.1",
-        "R1.1",
-        "C3.1"
+        "R1.1"
       ]
     },
     {
@@ -108,8 +79,7 @@
     "groupOrder": [
       "input",
       "regulator",
-      "output",
-      "indicator"
+      "output"
     ]
   }
 }

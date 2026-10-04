@@ -1,20 +1,21 @@
 {
   "session": "film",
-  "version": 1,
-  "kind": "generate",
-  "request": "5 V in on a 2-pin connector, an AMS1117-3.3 regulator with input and output capacitors, and 3.3 V out on a 2-pin connector.",
+  "version": 4,
+  "kind": "revise",
+  "request": "Fix this finding with the smallest change:\n1. [design rule reg_output_cap] U1 has no capacitor from its output (+3V3) to GND",
   "model": "gemma-4-31b-it",
   "attempts": 1,
+  "ops": 3,
   "usage": {
-    "promptTokens": 2446,
-    "outputTokens": 508,
+    "promptTokens": 2451,
+    "outputTokens": 72,
     "thoughtTokens": 0,
-    "totalTokens": 2954
+    "totalTokens": 2523
   },
-  "ms": 30504,
+  "ms": 35426,
   "bytes": {
-    "intent": 1143,
-    "schematic": 36493
+    "intent": 1479,
+    "schematic": 47215
   },
   "erc": {
     "errors": 0,
@@ -61,8 +62,35 @@
       "refs": [
         "U1"
       ]
+    },
+    {
+      "id": "rule-4",
+      "source": "rule",
+      "status": "pass",
+      "type": "led_series_resistor",
+      "message": "D1 is in series with R1",
+      "refs": [
+        "D1",
+        "R1"
+      ]
     }
   ],
+  "diff": {
+    "added": [
+      "C2"
+    ],
+    "removed": [],
+    "changed": [],
+    "nets": {
+      "added": [],
+      "removed": [],
+      "changed": [
+        "GND",
+        "+3V3"
+      ]
+    },
+    "same": false
+  },
   "glossary": [
     {
       "group": "Parts",
@@ -78,6 +106,16 @@
       "group": "Parts",
       "term": "U1, U2, …",
       "meaning": "integrated circuit (a chip, such as a regulator or microcontroller)"
+    },
+    {
+      "group": "Parts",
+      "term": "R1, R2, …",
+      "meaning": "resistor"
+    },
+    {
+      "group": "Parts",
+      "term": "D1, D2, …",
+      "meaning": "diode or LED"
     },
     {
       "group": "Rails",
@@ -113,6 +151,21 @@
       "group": "Pins",
       "term": "VI",
       "meaning": "voltage input"
+    },
+    {
+      "group": "Values",
+      "term": "k",
+      "meaning": "kilo-ohm, a thousand ohms (resistor value)"
+    },
+    {
+      "group": "Pins",
+      "term": "K",
+      "meaning": "cathode, the negative end of a diode or LED"
+    },
+    {
+      "group": "Pins",
+      "term": "A",
+      "meaning": "anode, the positive end of a diode or LED"
     },
     {
       "group": "Marks",

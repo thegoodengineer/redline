@@ -8,7 +8,7 @@
   "content": {
     "x": 18.06,
     "y": 10.364,
-    "w": 230.86,
+    "w": 158.19,
     "h": 73.086
   },
   "parts": {
@@ -25,113 +25,69 @@
       }
     },
     "C1": {
-      "x": 54.864,
+      "x": 55.118,
       "y": 39.37,
-      "w": 4.572,
+      "w": 4.064,
       "h": 7.62,
       "full": {
-        "x": 54.864,
+        "x": 55.118,
         "y": 36.83,
-        "w": 10.642,
-        "h": 12.7
-      }
-    },
-    "F1": {
-      "x": 78.486,
-      "y": 39.37,
-      "w": 3.048,
-      "h": 7.62,
-      "full": {
-        "x": 78.486,
-        "y": 36.83,
-        "w": 10.318,
-        "h": 12.7
-      }
-    },
-    "C2": {
-      "x": 101.854,
-      "y": 39.37,
-      "w": 4.572,
-      "h": 7.62,
-      "full": {
-        "x": 101.854,
-        "y": 36.83,
-        "w": 10.642,
+        "w": 10.134,
         "h": 12.7
       }
     },
     "U1": {
-      "x": 128.27,
+      "x": 81.28,
       "y": 34.925,
       "w": 15.24,
       "h": 9.525,
       "full": {
-        "x": 125.73,
+        "x": 78.74,
         "y": 30.525,
         "w": 20.32,
         "h": 16.465
       }
     },
-    "C3": {
-      "x": 159.004,
-      "y": 39.37,
-      "w": 4.572,
-      "h": 7.62,
-      "full": {
-        "x": 159.004,
-        "y": 36.83,
-        "w": 10.642,
-        "h": 12.7
-      }
-    },
-    "J2": {
-      "x": 185.42,
-      "y": 35.56,
-      "w": 6.35,
-      "h": 5.08,
-      "full": {
-        "x": 182.88,
-        "y": 31.16,
-        "w": 11.82,
-        "h": 9.48
-      }
-    },
     "R1": {
-      "x": 208.534,
+      "x": 112.014,
       "y": 39.37,
       "w": 2.032,
       "h": 7.62,
       "full": {
-        "x": 208.534,
+        "x": 112.014,
         "y": 36.83,
-        "w": 6.902,
+        "w": 5.702,
         "h": 12.7
       }
     },
     "D1": {
-      "x": 230.378,
+      "x": 132.588,
       "y": 35.56,
       "w": 8.382,
       "h": 3.556,
       "full": {
-        "x": 228.6,
+        "x": 130.81,
         "y": 31.16,
         "w": 12.7,
         "h": 7.956
+      }
+    },
+    "J2": {
+      "x": 158.75,
+      "y": 35.56,
+      "w": 6.35,
+      "h": 5.08,
+      "full": {
+        "x": 156.21,
+        "y": 31.16,
+        "w": 12.42,
+        "h": 9.48
       }
     }
   },
   "flags": [
     {
       "ref": "#FLG01",
-      "net": "VIN",
-      "x": 99.34,
-      "y": 29.58,
-      "w": 9.6,
-      "h": 4.71
-    },
-    {
-      "ref": "#FLG02",
       "net": "+5V",
       "x": 25.68,
       "y": 66.41,
@@ -139,7 +95,7 @@
       "h": 4.71
     },
     {
-      "ref": "#FLG03",
+      "ref": "#FLG02",
       "net": "GND",
       "x": 56.16,
       "y": 66.41,
@@ -176,34 +132,6 @@
       "kind": "symbol",
       "pin": "2"
     },
-    "ace04b66-634b-5eb4-9216-0c3931fbaa7c": {
-      "ref": "F1",
-      "kind": "symbol"
-    },
-    "55d11cb4-c7ff-5ceb-ad9b-2ccd3910dda4": {
-      "ref": "F1",
-      "kind": "symbol",
-      "pin": "1"
-    },
-    "eb6bf4ef-82e8-5269-a8d0-fe8346a74da9": {
-      "ref": "F1",
-      "kind": "symbol",
-      "pin": "2"
-    },
-    "b3382816-cdfa-53a6-9cd1-46fc88be51e7": {
-      "ref": "C2",
-      "kind": "symbol"
-    },
-    "25e95354-b978-59d0-a78e-f273a8364718": {
-      "ref": "C2",
-      "kind": "symbol",
-      "pin": "1"
-    },
-    "88d6fa9c-63aa-5aa6-9aa3-d7eea478a7f4": {
-      "ref": "C2",
-      "kind": "symbol",
-      "pin": "2"
-    },
     "1e543ad1-c078-505f-b2a9-cd19f5d9e872": {
       "ref": "U1",
       "kind": "symbol"
@@ -222,34 +150,6 @@
       "ref": "U1",
       "kind": "symbol",
       "pin": "3"
-    },
-    "9e32ff0e-45db-5606-b3b1-ca7e9e80d018": {
-      "ref": "C3",
-      "kind": "symbol"
-    },
-    "fe05f27d-f7ce-542a-b581-0a4c1d7793fd": {
-      "ref": "C3",
-      "kind": "symbol",
-      "pin": "1"
-    },
-    "210cda9b-2552-5212-8f85-353e8c187c52": {
-      "ref": "C3",
-      "kind": "symbol",
-      "pin": "2"
-    },
-    "10959ccf-0e74-522a-9ca6-a0360d1af1f1": {
-      "ref": "J2",
-      "kind": "symbol"
-    },
-    "4f903986-be97-59c3-8ee7-5cb967960032": {
-      "ref": "J2",
-      "kind": "symbol",
-      "pin": "1"
-    },
-    "7459100f-0a02-5ec1-99d2-df404cae5704": {
-      "ref": "J2",
-      "kind": "symbol",
-      "pin": "2"
     },
     "686effa5-54a7-507e-b6e8-df398beccf5a": {
       "ref": "R1",
@@ -279,12 +179,26 @@
       "kind": "symbol",
       "pin": "2"
     },
+    "10959ccf-0e74-522a-9ca6-a0360d1af1f1": {
+      "ref": "J2",
+      "kind": "symbol"
+    },
+    "4f903986-be97-59c3-8ee7-5cb967960032": {
+      "ref": "J2",
+      "kind": "symbol",
+      "pin": "1"
+    },
+    "7459100f-0a02-5ec1-99d2-df404cae5704": {
+      "ref": "J2",
+      "kind": "symbol",
+      "pin": "2"
+    },
     "b58fe38a-35d2-55af-9eb2-d5a3702ebc15": {
       "ref": "J1",
       "net": "+5V",
       "kind": "wire"
     },
-    "23d46c26-d7f4-53ff-b38a-55d74329059a": {
+    "c41e5aa3-5043-53e2-8797-cbcaed060314": {
       "ref": "J1",
       "net": "+5V",
       "kind": "wire"
@@ -299,47 +213,7 @@
       "net": "+5V",
       "kind": "wire"
     },
-    "b521e44f-0e28-5e2b-a287-ad9d5c74f515": {
-      "ref": "J1",
-      "net": "+5V",
-      "kind": "wire"
-    },
-    "c543a623-f29b-5e88-8eb8-8f7d9d168f0b": {
-      "ref": "F1",
-      "net": "VIN",
-      "kind": "wire"
-    },
-    "65e05dc3-a7dc-5b5d-8da0-a3898514d6d7": {
-      "ref": "F1",
-      "net": "VIN",
-      "kind": "wire"
-    },
-    "af39f134-b7a6-5776-b71e-ec8ca9bb9e0c": {
-      "ref": "F1",
-      "net": "VIN",
-      "kind": "wire"
-    },
-    "3af0a2bc-3e5f-5343-8b35-282dd9cd2200": {
-      "ref": "F1",
-      "net": "VIN",
-      "kind": "wire"
-    },
-    "b39352de-16dc-5734-9ec9-792e6cab5de9": {
-      "ref": "F1",
-      "net": "VIN",
-      "kind": "wire"
-    },
-    "4488f62a-b967-5374-8330-1b5b7416cd90": {
-      "ref": "F1",
-      "net": "VIN",
-      "kind": "wire"
-    },
-    "e795690b-f9df-5d73-8283-65f5315622f3": {
-      "ref": "F1",
-      "net": "VIN",
-      "kind": "wire"
-    },
-    "a8e1bb14-6416-5bf3-adfd-39111bbdfd73": {
+    "415a0a01-6d5a-57c6-b52e-2bd0519c41e0": {
       "ref": "J1",
       "net": "GND",
       "kind": "wire"
@@ -349,7 +223,12 @@
       "net": "GND",
       "kind": "wire"
     },
-    "221d4e51-6256-5038-b53f-606b1fd65956": {
+    "de744202-ae17-5a85-868b-fc6105ef8405": {
+      "ref": "J1",
+      "net": "GND",
+      "kind": "wire"
+    },
+    "7bac268c-6062-5777-847b-4f2fe382563e": {
       "ref": "J1",
       "net": "GND",
       "kind": "wire"
@@ -359,27 +238,17 @@
       "net": "GND",
       "kind": "wire"
     },
-    "e47c1967-9a79-5219-8d63-f759943a70e1": {
+    "1bfb12f7-3d09-5931-ae25-f9aa35bb8aee": {
       "ref": "J1",
       "net": "GND",
       "kind": "wire"
     },
-    "935af82c-45fd-57e4-bd91-2aab63229ea3": {
+    "a6322c7a-00f2-5a5a-8f50-3946bae8f371": {
       "ref": "J1",
       "net": "GND",
       "kind": "wire"
     },
-    "20444a7b-8c49-52cf-aebc-c50177937cb4": {
-      "ref": "J1",
-      "net": "GND",
-      "kind": "wire"
-    },
-    "336390ad-45aa-5f47-86ba-170d20caf6ba": {
-      "ref": "J1",
-      "net": "GND",
-      "kind": "wire"
-    },
-    "99589bcd-a7aa-5156-be58-9a85d62407cb": {
+    "cef154d9-e9d7-5d92-a83c-f5a0ca3c7da7": {
       "ref": "J1",
       "net": "GND",
       "kind": "wire"
@@ -394,107 +263,92 @@
       "net": "GND",
       "kind": "wire"
     },
-    "ba35e433-9726-50c1-8921-f3fdc91b4c94": {
+    "31420328-4bff-54ae-a32a-d7f6a8d70cca": {
       "ref": "J1",
       "net": "GND",
       "kind": "wire"
     },
-    "c728cbd3-8e2d-5b72-a84a-86bd9474b1fb": {
+    "c3161d64-2264-5985-b2c4-c037924a5a63": {
       "ref": "J1",
       "net": "GND",
       "kind": "wire"
     },
-    "16398db9-8241-52a9-b964-c5a692d33da3": {
+    "0492b730-a550-556f-b869-8aefda2feb15": {
       "ref": "J1",
       "net": "GND",
       "kind": "wire"
     },
-    "593af742-850b-5ae1-9e6a-7be7fb1df989": {
+    "921acad9-37c3-51e2-9120-57b88a86b650": {
       "ref": "J1",
       "net": "GND",
       "kind": "wire"
     },
-    "da4022a1-f974-54ec-93e7-f664583964f0": {
+    "5213a309-308b-5868-847e-de949d45305a": {
       "ref": "J1",
       "net": "GND",
       "kind": "wire"
     },
-    "f6c92a35-7b32-5b56-89a0-7537423ff808": {
+    "67159c91-dfbb-5e15-bf6d-d7bb4a57bb74": {
       "ref": "J1",
       "net": "GND",
       "kind": "wire"
     },
-    "e2373f62-adb0-5fc7-b219-71bea5faf3b7": {
-      "ref": "J1",
-      "net": "GND",
-      "kind": "wire"
-    },
-    "c98635b2-65c6-517f-abf5-d8495cc41af1": {
-      "ref": "J1",
-      "net": "GND",
-      "kind": "wire"
-    },
-    "fedc27fd-6543-5b17-a702-b98674c9fc38": {
-      "ref": "J1",
-      "net": "GND",
-      "kind": "wire"
-    },
-    "2d2b2305-225a-58f0-bb39-3d341c95bd45": {
+    "a85e452f-6735-5545-833d-65768975499d": {
       "ref": "U1",
       "net": "+3V3",
       "kind": "wire"
     },
-    "37224d90-fb7e-52b4-9cdb-02e271570da2": {
+    "153d7d8f-5011-5187-a139-7d5ab6151a0f": {
       "ref": "U1",
       "net": "+3V3",
       "kind": "wire"
     },
-    "99bc8a7e-960a-5e7f-835e-f14803dd51c6": {
+    "84e87c94-aae1-554c-a2c5-44267695f8bf": {
       "ref": "U1",
       "net": "+3V3",
       "kind": "wire"
     },
-    "866815e2-5d8a-52cf-8d59-ed1a99a1fc20": {
+    "52007c7b-8d5d-55ff-a6b3-c93bf7910c87": {
       "ref": "U1",
       "net": "+3V3",
       "kind": "wire"
     },
-    "287c49cc-0635-57ac-9812-229ecd816155": {
+    "3934ea38-c7e0-5b31-9a0b-80d406f05875": {
       "ref": "U1",
       "net": "+3V3",
       "kind": "wire"
     },
-    "fddc9995-2ced-5c78-96c3-647fe9b3e8f6": {
+    "62ed5782-268d-571f-a2c4-0fc5f46dc276": {
       "ref": "U1",
       "net": "+3V3",
       "kind": "wire"
     },
-    "438549c8-9be1-5b18-91c6-020677211c6f": {
+    "cf0f05c8-4130-5044-95df-7b639c140a40": {
       "ref": "U1",
       "net": "+3V3",
       "kind": "wire"
     },
-    "29e39a51-2ce8-5807-a1f6-c9d3d10e461a": {
+    "cdcaa6eb-8d0d-50dd-a0fc-4254689d8149": {
       "ref": "U1",
       "net": "+3V3",
       "kind": "wire"
     },
-    "24e86dd7-3db9-511e-9284-520066c4da2d": {
+    "2bffdb43-6c53-5f45-8102-2489bc303784": {
       "ref": "R1",
       "net": "LED_A",
       "kind": "wire"
     },
-    "f10c91f8-f475-5042-886f-95e7e83c5c8c": {
+    "9e74d033-965e-50c4-8f54-3b2490def8e6": {
       "ref": "R1",
       "net": "LED_A",
       "kind": "wire"
     },
-    "f5a0907b-6c86-5729-8916-c982a9a8926b": {
+    "21812abc-4515-5cce-b902-a78a2bfd0c52": {
       "ref": "R1",
       "net": "LED_A",
       "kind": "wire"
     },
-    "2db1c1d8-7059-537b-acbe-c3d4dfe4191f": {
+    "98518bdf-ce4c-5fc4-9535-cc4356143028": {
       "ref": "R1",
       "net": "LED_A",
       "kind": "wire"
@@ -504,52 +358,32 @@
       "net": "+5V",
       "kind": "junction"
     },
-    "584d3008-6f82-589b-aca4-2d8f7a46a5d4": {
-      "ref": "F1",
-      "net": "VIN",
-      "kind": "junction"
-    },
     "66ae811e-4c2f-557f-8c98-5dabd6c151d7": {
       "ref": "J1",
       "net": "GND",
       "kind": "junction"
     },
-    "d5caf01f-6b82-5e55-9cf5-8c5920ffb45e": {
+    "d52e3fc7-dca0-554d-bb35-fd3595335937": {
       "ref": "J1",
       "net": "GND",
       "kind": "junction"
     },
-    "f55e4505-0876-5429-aeae-a77a603dcdb5": {
+    "81d3ddbf-2df0-54a4-835e-3eea27a3c0e1": {
       "ref": "J1",
       "net": "GND",
       "kind": "junction"
     },
-    "6fc4007d-1a72-50bd-9834-ccc67dc03651": {
+    "3529161c-240b-58f0-833c-151466f49185": {
       "ref": "J1",
       "net": "GND",
       "kind": "junction"
     },
-    "69e852f7-097f-5fa6-8c37-1fa174c16da2": {
-      "ref": "J1",
-      "net": "GND",
-      "kind": "junction"
-    },
-    "d1900d27-ebd6-591c-96cd-83ec2cc7c0d5": {
-      "ref": "J1",
-      "net": "GND",
-      "kind": "junction"
-    },
-    "a66a593e-c154-51e3-8b9e-c61e3b5084e3": {
+    "8a6d16d0-1e83-5e96-86c8-57a08abbe413": {
       "ref": "U1",
       "net": "+3V3",
       "kind": "junction"
     },
-    "e4f2f859-aa5b-5677-83b7-a80570c61325": {
-      "ref": "U1",
-      "net": "+3V3",
-      "kind": "junction"
-    },
-    "1900c909-0dc4-5c11-be53-0b657054fbe9": {
+    "54ca2896-d8c0-583c-a611-14a920bdd003": {
       "ref": "U1",
       "net": "+3V3",
       "kind": "junction"
@@ -587,67 +421,56 @@
       "kind": "power",
       "pin": "1"
     },
-    "6d0911ee-0928-5d42-8b3f-48acc5292689": {
-      "ref": "#FLG01",
-      "net": "VIN",
-      "kind": "flag"
-    },
-    "ea5a1d1a-a4ba-5d8a-9a94-1b40f6deb5a1": {
-      "ref": "#FLG01",
-      "net": "VIN",
-      "kind": "flag",
-      "pin": "1"
-    },
     "2684dc89-d2b3-56a7-950e-3d43267e6895": {
-      "ref": "#FLG02",
+      "ref": "#FLG01",
       "net": "+5V",
       "kind": "flag"
     },
     "183e4547-7a21-5677-ad47-1b3923d90337": {
-      "ref": "#FLG02",
+      "ref": "#FLG01",
       "net": "+5V",
       "kind": "flag",
       "pin": "1"
     },
     "3474b413-c458-5ed7-9f29-558790658b63": {
-      "ref": "#FLG02",
+      "ref": "#FLG01",
       "net": "+5V",
       "kind": "wire"
     },
     "a2651354-6595-551a-92eb-c9d6ebe56bca": {
-      "ref": "#FLG02",
+      "ref": "#FLG01",
       "net": "+5V",
       "kind": "power"
     },
     "290f688d-9e89-5355-b2ec-ccbc59253c4c": {
-      "ref": "#FLG02",
+      "ref": "#FLG01",
       "net": "+5V",
       "kind": "power",
       "pin": "1"
     },
     "4108e620-d662-5f89-a019-18d4f3a32f8a": {
-      "ref": "#FLG03",
+      "ref": "#FLG02",
       "net": "GND",
       "kind": "flag"
     },
     "dae3dc15-0a65-58b7-887b-86737d6af5d3": {
-      "ref": "#FLG03",
+      "ref": "#FLG02",
       "net": "GND",
       "kind": "flag",
       "pin": "1"
     },
     "ec278c19-dc5e-55e8-a751-8494d14766c1": {
-      "ref": "#FLG03",
+      "ref": "#FLG02",
       "net": "GND",
       "kind": "wire"
     },
     "f7d0ae5f-c37b-5507-ba29-3a0f32288c39": {
-      "ref": "#FLG03",
+      "ref": "#FLG02",
       "net": "GND",
       "kind": "power"
     },
     "807dcb8c-3485-5c16-aebd-215522b31510": {
-      "ref": "#FLG03",
+      "ref": "#FLG02",
       "net": "GND",
       "kind": "power",
       "pin": "1"

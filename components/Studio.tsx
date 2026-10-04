@@ -28,6 +28,11 @@ interface Failure {
 }
 
 const fmt = (n: number) => n.toLocaleString("en-US");
+/** The recorded demo in order: each version, then the questions that were asked about it. */
+type Step = { version: VersionPayload } | { answer: Answer };
+function stepsOf(versions: VersionPayload[], answers: Answer[]): Step[] {
+  return versions.flatMap((version) => [{ version } as Step, ...answers.filter((a) => a.after === version.meta.version).map((answer) => ({ answer }) as Step)]);
+}
 /** Versions the engineer has not undone. */
 const visible = (list: VersionPayload[]) => list.filter((v) => !v.meta.undone);
 const newSession = () => `s-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
@@ -37,8 +42,12 @@ export default function Studio() {
   const params = useSearchParams();
   const demo = params.get("demo") === "1";
   const session = demo ? null : params.get("s");
-  /** Recorded versions from demo/, revealed one at a time in demo mode. */
+  /** ?film=1: the demo types its text and waits less, for recording the video. */
+  const film = demo && params.get("film") === "1";
+  /** The recorded session from demo/, replayed one step at a time: versions, and answers to questions. */
   const [recorded, setRecorded] = useState<VersionPayload[]>([]);
+  const [recordedAnswers, setRecordedAnswers] = useState<Answer[]>([]);
+  const [stepCount, setStepCount] = useState(0);
 
   const [versions, setVersions] = useState<VersionPayload[]>([]);
   const [current, setCurrent] = useState<number | null>(null);
@@ -69,17 +78,23 @@ export default function Studio() {
         const body = await r.json();
         if (!r.ok) throw new Error(body.error ?? `HTTP ${r.status}`);
         if (!demo) setAnswers(body.answers ?? []);
-        return body.versions as VersionPayload[];
+        else setRecordedAnswers(body.answers ?? []);
+        return [body.versions as VersionPayload[], (body.answers ?? []) as Answer[]] as const;
       })
-      .then((v) => {
+      .then(([all, recordedAnswerList]) => {
         if (!live) return;
-        v = demo ? v : visible(v);
+        const v = demo ? all : visible(all);
         if (demo) {
-          // ?start=N opens the demo with the first N recorded versions already shown.
-          const start = Math.min(Number(params.get("start")) || 0, v.length);
+          // ?start=N opens the demo with the first N recorded steps already shown.
+          const order = stepsOf(v, recordedAnswerList);
+          const start = Math.min(Number(params.get("start")) || 0, order.length);
+          const done = order.slice(0, start);
+          const shownVersions = done.flatMap((s) => ("version" in s ? [s.version] : []));
           setRecorded(v);
-          setVersions(v.slice(0, start));
-          setCurrent(start ? v[start - 1].meta.version : null);
+          setStepCount(start);
+          setVersions(shownVersions);
+          setAnswers(done.flatMap((s) => ("answer" in s ? [s.answer] : [])));
+          setCurrent(shownVersions.at(-1)?.meta.version ?? null);
           return;
         }
         setVersions(v);
@@ -92,12 +107,23 @@ export default function Studio() {
     };
   }, [session, demo]);
 
-  const next = demo ? recorded[versions.length] : undefined;
+  const steps = useMemo(() => stepsOf(recorded, recordedAnswers), [recorded, recordedAnswers]);
+  const next = demo ? steps[stepCount] : undefined;
   const shown = (request: string) => request.replace(/\[(?:KiCad ERC|design rule) [a-z_]+\] /g, "");
-  // Demo mode: the composer shows the next recorded request.
+  const nextText = next ? ("version" in next ? shown(next.version.meta.request) : next.answer.question) : "";
+  // Demo mode: the composer shows the next recorded message (typed out when filming).
   useEffect(() => {
-    if (demo) setDraft(next ? shown(next.meta.request) : "");
-  }, [demo, next]);
+    if (!demo) return;
+    if (!film || !nextText) return setDraft(nextText);
+    let n = 0;
+    setDraft("");
+    const t = setInterval(() => {
+      n += Math.max(2, Math.ceil(nextText.length / 28));
+      setDraft(nextText.slice(0, n));
+      if (n >= nextText.length) clearInterval(t);
+    }, 45);
+    return () => clearInterval(t);
+  }, [demo, film, nextText]);
 
   useEffect(() => {
     if (!busy) return;
@@ -125,13 +151,22 @@ export default function Studio() {
     async (a: Action) => {
       if (busy) return;
       if (demo) {
-        // Replay the next recorded turn. No model, no kicad-cli.
+        // Replay the next recorded step. No model, no kicad-cli.
         if (!next) return;
-        setBusy({ text: shown(next.meta.request), since: Date.now(), action: next.meta.kind === "generate" ? "generate" : "revise" });
-        await new Promise((r) => setTimeout(r, 2600));
-        setVersions((v) => [...v, next]);
-        setCurrent(next.meta.version);
-        setRevealed(0);
+        setReview(null);
+        setBusy({ text: nextText, since: Date.now(), action: "version" in next && next.version.meta.kind === "generate" ? "generate" : "revise" });
+        await new Promise((r) => setTimeout(r, film ? 1500 : 2600));
+        if ("version" in next) {
+          const v = next.version;
+          setVersions((list) => [...list, v]);
+          setCurrent(v.meta.version);
+          setReview(v.meta.kind === "revise" ? v.meta.version : null);
+          setRevealed(0);
+        } else {
+          const a = next.answer;
+          setAnswers((list) => [...list, a]);
+        }
+        setStepCount((n) => n + 1);
         setBusy(null);
         return;
       }
@@ -174,7 +209,7 @@ export default function Studio() {
         setBusy(null);
       }
     },
-    [busy, session, current, versions, router, demo, next],
+    [busy, session, current, versions, router, demo, next, nextText, film],
   );
 
   // ?demo=1&auto=1 plays the recorded story by itself (used to record the video).
@@ -317,6 +352,8 @@ export default function Studio() {
                   setCurrent(null);
                   setFailures([]);
                   setAnswers([]);
+                  setStepCount(0);
+                  setReview(null);
                   router.replace(demo ? "/studio?demo=1" : "/studio");
                 }}
               >
@@ -329,7 +366,7 @@ export default function Studio() {
               <div className="empty-chat">
                 <p>
                   {demo
-                    ? "This is a recorded session: three real turns with gemma-4-31b-it, replayed from the demo folder with no API or kicad-cli calls. Press Replay to step through it."
+                    ? "This is a recorded session: real turns with gemma-4-31b-it, replayed from the demo folder with no API or kicad-cli calls. Press Replay to step through it."
                     : "Describe a circuit in plain words. Gemma writes the parts and nets; code draws the sheet and KiCad checks it. Then ask for changes, or click a part to mention it."}
                 </p>
                 <div className="examples" style={demo ? { display: "none" } : undefined}>
@@ -466,7 +503,7 @@ export default function Studio() {
             <div className="row">
               <span className="label">{demo ? "No API calls" : payload ? `Revises v${payload.meta.version}` : "Enter to send"}</span>
               <button className="btn primary" disabled={!!busy || (demo ? !next : draft.trim().length < 3)} onClick={submit}>
-                {busy ? "Working…" : demo ? (next ? `Replay v${next.meta.version}` : "End of demo") : payload ? "Send" : "Draft schematic"}
+                {busy ? "Working…" : demo ? (next ? ("version" in next ? `Replay v${next.version.meta.version}` : "Replay answer") : "End of demo") : payload ? "Send" : "Draft schematic"}
               </button>
             </div>
           </div>
@@ -487,7 +524,7 @@ export default function Studio() {
                       {diff && diff.changed.length > 0 ? ` · ~${diff.changed.map((c) => c.ref).join(" ~")}` : ""}
                       {diff?.same ? " · no change" : ""}
                     </span>
-                    <button className="btn small" onClick={undo}>
+                    <button className="btn small" onClick={undo} disabled={demo} title={demo ? "Not available in the recorded demo" : undefined}>
                       Undo
                     </button>
                     <button className="btn small keep" onClick={() => setReview(null)}>
@@ -556,7 +593,7 @@ export default function Studio() {
                   <h2 className="mono">{elapsed} s</h2>
                   <p>
                     {demo && next
-                      ? `Replaying a recorded turn. The real call took ${(next.meta.ms / 1000).toFixed(0)} seconds.`
+                      ? `Replaying a recorded turn. The real call took ${(("version" in next ? next.version.meta.ms : next.answer.ms) / 1000).toFixed(0)} seconds.`
                       : "Gemma usually answers in 40 to 100 seconds. The rest takes about two."}
                   </p>
                   <ul className="steps">
