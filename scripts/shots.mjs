@@ -1,4 +1,4 @@
-// Playwright screenshots of the running app at 1440 and 1024 wide.
+// Playwright screenshots of the running app at 1440, 1024 and 400 wide.
 // Usage: node scripts/shots.mjs <name> <path-with-query> [click=<selector> | hover=<selector> | type=<text> | wait=<ms>]...
 //   e.g. node scripts/shots.mjs studio-v2 "/studio?s=live"
 import { chromium } from "playwright";
@@ -15,6 +15,7 @@ const browser = await chromium.launch({ channel: "msedge" });
 for (const [w, h] of [
   [1440, 900],
   [1024, 768],
+  [400, 800],
 ]) {
   const page = await browser.newPage({ viewport: { width: w, height: h } });
   await page.goto(base + path, { waitUntil: "networkidle" });

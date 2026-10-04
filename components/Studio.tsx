@@ -66,7 +66,14 @@ export default function Studio() {
       })
       .then((v) => {
         if (!live) return;
-        if (demo) return setRecorded(v);
+        if (demo) {
+          // ?start=N opens the demo with the first N recorded versions already shown.
+          const start = Math.min(Number(params.get("start")) || 0, v.length);
+          setRecorded(v);
+          setVersions(v.slice(0, start));
+          setCurrent(start ? v[start - 1].meta.version : null);
+          return;
+        }
         setVersions(v);
         setCurrent(v.length ? v[v.length - 1].meta.version : null);
       })
@@ -154,6 +161,14 @@ export default function Studio() {
     },
     [busy, session, current, versions, router, demo, next],
   );
+
+  // ?demo=1&auto=1 plays the recorded story by itself (used to record the video).
+  const auto = demo && params.get("auto") === "1";
+  useEffect(() => {
+    if (!auto || busy || !next || revealed < checks.length) return;
+    const t = setTimeout(() => run({ action: "generate", text: "" }), versions.length ? 5000 : 1500);
+    return () => clearTimeout(t);
+  }, [auto, busy, next, revealed, checks.length, versions.length, run]);
 
   const submit = () => {
     const text = draft.trim();

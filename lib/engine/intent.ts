@@ -31,7 +31,14 @@ export const IntentSchema = z
         .strict(),
     ),
     noConnect: z.array(z.string().regex(PIN, 'pin must look like "U1.3"')).default([]),
-    hints: z.object({ groupOrder: z.array(z.string()).default([]) }).strict().default({ groupOrder: [] }),
+    hints: z
+      .object({
+        groupOrder: z.array(z.string()).default([]),
+        /** "wires" (default) draws routed wires; "labels" gives every pin a stub and a net label. */
+        wiring: z.enum(["wires", "labels"]).optional(),
+      })
+      .strict()
+      .default({ groupOrder: [] }),
   })
   .strict();
 

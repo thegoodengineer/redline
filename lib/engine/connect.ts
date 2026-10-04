@@ -20,7 +20,8 @@ export interface TextField {
 
 export interface Attachment {
   pin: PinDef;
-  kind: "label" | "power" | "nc";
+  /** "stub" is a bare stub whose wire is drawn by the router (wired mode). */
+  kind: "label" | "power" | "nc" | "stub";
   net: string | null;
   /** Stub end. Equal to the pin position for "nc". */
   ex: number;
@@ -36,6 +37,8 @@ export interface PartGeometry {
   libId: string;
   value: string;
   def: SymbolDef;
+  /** Mirrored left-to-right so its pins face the parts it connects to. */
+  mirror?: boolean;
   reference: TextField;
   valueField: TextField;
   attachments: Attachment[];
@@ -45,7 +48,7 @@ export interface PartGeometry {
   full: Box;
 }
 
-const VEC: Record<PinDir, { x: number; y: number }> = {
+export const VEC: Record<PinDir, { x: number; y: number }> = {
   L: { x: -1, y: 0 },
   R: { x: 1, y: 0 },
   U: { x: 0, y: -1 },
@@ -54,19 +57,19 @@ const VEC: Record<PinDir, { x: number; y: number }> = {
 
 export const textWidth = (s: string) => Math.max(1, s.length) * CHAR_W;
 
-function fieldBox(f: TextField): Box {
+export function fieldBox(f: TextField): Box {
   const w = textWidth(f.text);
   const x0 = f.justify === "left" ? f.x : f.x - w / 2;
   return { x0, y0: f.y - TEXT_HALF_H, x1: x0 + w, y1: f.y + TEXT_HALF_H };
 }
 
-function intersects(a: Box, b: Box): boolean {
+export function intersects(a: Box, b: Box): boolean {
   const e = 0.01;
   return a.x0 < b.x1 - e && a.x1 > b.x0 + e && a.y0 < b.y1 - e && a.y1 > b.y0 + e;
 }
 
 /** Which way a power symbol's graphic points when not rotated. */
-function naturalDir(def: SymbolDef): "U" | "D" {
+export function naturalDir(def: SymbolDef): "U" | "D" {
   return (def.body.y0 + def.body.y1) / 2 > 0 ? "D" : "U";
 }
 

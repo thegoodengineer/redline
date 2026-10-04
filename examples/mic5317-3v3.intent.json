@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "title": "+5 TO +3V3 regulator",
+  "comment": "Written by hand from a reference drawing: MIC5317-3.3YM5 with EN tied to VIN, 1 uF on input and output, JST GH SM02B-GHS-TB connectors. KiCad's mounting-pin connector symbol has one mounting pin (MP) where the reference shows two.",
+  "parts": [
+    { "ref": "J1", "libId": "Connector_Generic_MountingPin:Conn_01x02_MountingPin", "value": "SM02B-GHS-TB(LF)(SN)", "group": "input" },
+    { "ref": "C1", "libId": "Device:C", "value": "1u", "group": "input" },
+    { "ref": "U1", "libId": "Regulator_Linear:MIC5317-3.3xM5", "value": "MIC5317-3.3YM5-TR", "group": "regulator" },
+    { "ref": "C2", "libId": "Device:C", "value": "1u", "group": "output" },
+    { "ref": "J2", "libId": "Connector_Generic_MountingPin:Conn_01x02_MountingPin", "value": "SM02B-GHS-TB(LF)(SN)", "group": "output" }
+  ],
+  "nets": [
+    { "name": "+5V", "pins": ["J1.1", "C1.1", "U1.1", "U1.3"] },
+    { "name": "+3V3", "pins": ["U1.5", "C2.1", "J2.1"] },
+    { "name": "GND", "pins": ["J1.2", "C1.2", "U1.2", "C2.2", "J2.2"] }
+  ],
+  "noConnect": ["U1.4", "J1.MP", "J2.MP"],
+  "hints": { "groupOrder": ["input", "regulator", "output"] }
+}

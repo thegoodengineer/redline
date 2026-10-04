@@ -37,12 +37,12 @@ RULES
 1. Use only libIds from the catalogue below, spelled exactly.
 2. ref = the catalogue ref prefix plus a number (R1, R2, C1). Every ref is unique.
 3. A pin is "REF.NUMBER" using the pin numbers from the catalogue, never pin names.
-4. Every pin of every part appears in exactly one net, or in noConnect. No pin appears twice.
+4. Every pin of every part appears in exactly one net, or in noConnect. No pin appears twice. Pins of type no_connect and unused mounting pins go in noConnect.
 5. Name the rails exactly GND, +5V and +3V3. Other nets get short upper-case names like VIN or LED_A.
 6. Power symbols are drawn for you. Never list a power: symbol as a part.
-7. group is a short lower-case block name (input, regulator, output). hints.groupOrder lists the groups left to right in signal-flow order.
+7. group is a short lower-case block name (input, regulator, output). hints.groupOrder lists the groups left to right in signal-flow order. List parts in signal-flow order too (input connector, input capacitor, regulator, output capacitor, output connector): they are drawn left to right in that order and joined with wires.
 8. value is the component value (10uF, 330, 1k) or, for connectors and switches, a short function name.
-9. Good practice: a regulator needs a capacitor from its input to GND and from its output to GND; every LED needs a series resistor; a regulator's input and output must be different nets. The AMS1117 datasheet asks for 22uF on the output.
+9. Good practice: a regulator needs a capacitor from its input to GND and from its output to GND; every LED needs a series resistor; a regulator's input and output must be different nets. The AMS1117 datasheet asks for 22uF on the output; the MIC5317 needs 1uF on input and output.
 
 CATALOGUE
 ${catalogueText(lib)}

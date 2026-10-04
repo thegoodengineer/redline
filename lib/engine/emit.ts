@@ -6,6 +6,7 @@ import { POWER_NETS, PWR_FLAG } from "./catalogue";
 import { PartGeometry, powerSymbolAt, textWidth } from "./connect";
 import { Intent } from "./intent";
 import { ORIGIN_X, snapUp } from "./place";
+import type { Wiring } from "./wired";
 import { Node, num, q, write } from "./sexp";
 import { Box, SymbolDef, SymbolLibrary, unionBox } from "./symbols";
 
@@ -21,6 +22,8 @@ export interface Rect {
 
 export interface Layout {
   paper: "A4" | "A3";
+  /** "wires": routed wires and one symbol per rail. "labels": a stub and a label on every pin. */
+  wiring: "wires" | "labels";
   sheet: { w: number; h: number };
   /** Bounding box of everything drawn, sheet millimetres. */
   content: Rect;
@@ -68,6 +71,7 @@ export function emit(
   origins: Map<string, { x: number; y: number }>,
   flagNets: string[],
   lib: SymbolLibrary,
+  wiring?: Wiring,
   project = "design",
 ): { sch: string; layout: Layout } {
   const root = stableUuid(`root:${intent.title}`);
@@ -75,6 +79,9 @@ export function emit(
   const wires: Node[] = [];
   const labels: Node[] = [];
   const noConnects: Node[] = [];
+  const junctions: Node[] = [];
+  const drawings: Node[] = [];
+  let flagCount = 0;
   const symbols: Node[] = [];
   const uuids: Layout["uuids"] = {};
   const parts: Layout["parts"] = {};
@@ -93,6 +100,7 @@ export function emit(
     x: number;
     y: number;
     rotation: number;
+    mirror?: boolean;
     ref: string;
     value: string;
     refAt: { x: number; y: number; left?: boolean };
@@ -106,6 +114,7 @@ export function emit(
       "symbol",
       ["lib_id", q(o.def.libId)],
       at(o.x, o.y, o.rotation),
+      ...(o.mirror ? [["mirror", "y"] as Node[]] : []),
       ["unit", "1"],
       ["body_style", "1"],
       ["exclude_from_sim", "no"],
@@ -173,6 +182,7 @@ export function emit(
         x: o.x,
         y: o.y,
         rotation: 0,
+        mirror: g.mirror,
         ref: g.ref,
         value: g.value,
         refAt: { x: o.x + g.reference.x, y: o.y + g.reference.y, left: g.reference.justify === "left" },
@@ -191,6 +201,7 @@ export function emit(
         noConnects.push(["no_connect", at(px, py), ["uuid", q(id(`nc:${seed}`, { ...owner, kind: "no_connect" }))]]);
         continue;
       }
+      if (a.kind === "stub") continue; // drawn by the router
       wire(px, py, o.x + a.ex, o.y + a.ey, seed, { ...owner, kind: "wire" });
       if (a.kind === "label") label(a.net!, o.x + a.ex, o.y + a.ey, a.labelAngle!, seed, { ...owner, kind: "label" });
       else powerSymbol(a.powerLibId!, a.net!, o.x + a.ex, o.y + a.ey, a.rotation!, seed, g.ref);
@@ -200,30 +211,60 @@ export function emit(
     content = unionBox(content, full);
   }
 
-  // One PWR_FLAG island per undriven power net, in a row under the parts.
+  const flagDef = lib.get(PWR_FLAG);
+  /** A PWR_FLAG with its pin at (x, y). */
+  const flagSymbol = (net: string, x: number, y: number) => {
+    const owner = { ref: `#FLG${String(++flagCount).padStart(2, "0")}`, net };
+    const flag = powerSymbolAt(flagDef, x, y, 0, "PWR_FLAG");
+    symbols.push(
+      symbol({
+        def: flagDef,
+        x,
+        y,
+        rotation: 0,
+        ref: owner.ref,
+        value: "PWR_FLAG",
+        refAt: { x, y },
+        valueAt: flag.valueAt,
+        hideRef: true,
+        seed: `flag:${net}`,
+        owner: { ...owner, kind: "flag" },
+      }),
+    );
+    return { owner, box: flag.box };
+  };
+
+  // Routed wires, junctions, and the symbols hung on them.
+  if (wiring) {
+    const refOf = (net: string) => intent.nets.find((n) => n.name === net)?.pins[0].split(".")[0] ?? "";
+    for (const w of wiring.wires) {
+      wire(w.x0, w.y0, w.x1, w.y1, `net:${w.net}:${num(w.x0)},${num(w.y0)},${num(w.x1)},${num(w.y1)}`, { ref: refOf(w.net), net: w.net, kind: "wire" });
+    }
+    for (const j of wiring.junctions) {
+      junctions.push([
+        "junction",
+        at(j.x, j.y),
+        ["diameter", "0"],
+        ["color", "0", "0", "0", "0"],
+        ["uuid", q(id(`junction:${j.net}:${num(j.x)},${num(j.y)}`, { ref: refOf(j.net), net: j.net, kind: "junction" }))],
+      ]);
+    }
+    for (const p of wiring.powers) powerSymbol(p.libId, p.net, p.x, p.y, p.rotation, `net:${p.net}`, refOf(p.net));
+    for (const f of wiring.flagTaps) {
+      const { owner, box } = flagSymbol(f.net, f.x, f.y);
+      flags.push({ ref: owner.ref, net: f.net, ...rect(box) });
+    }
+    content = unionBox(content, wiring.box);
+  }
+
+  // One PWR_FLAG island per undriven power rail, in a row under the parts.
   if (flagNets.length) {
-    const flagDef = lib.get(PWR_FLAG);
     const y = snapUp((content?.y1 ?? ORIGIN_X) + 12.7);
     flagNets.forEach((net, i) => {
       const x = ORIGIN_X + i * 30.48;
       const ax = x + 10.16;
-      const owner = { ref: `#FLG${String(i + 1).padStart(2, "0")}`, net };
-      const flag = powerSymbolAt(flagDef, x, y, 0, "PWR_FLAG");
-      symbols.push(
-        symbol({
-          def: flagDef,
-          x,
-          y,
-          rotation: 0,
-          ref: owner.ref,
-          value: "PWR_FLAG",
-          refAt: { x, y },
-          valueAt: flag.valueAt,
-          hideRef: true,
-          seed: `flag:${net}`,
-          owner: { ...owner, kind: "flag" },
-        }),
-      );
+      const flag = flagSymbol(net, x, y);
+      const owner = flag.owner;
       wire(x, y, ax, y, `flag:${net}`, { ...owner, kind: "wire" });
       let box = flag.box;
       const powerLibId = POWER_NETS[net];
@@ -239,6 +280,28 @@ export function emit(
     });
   }
 
+  // Wired sheets get a frame and the title, like a hand-drawn block.
+  if (wiring && content) {
+    const f = { x0: content.x0 - 7.62, y0: content.y0 - 7.62, x1: content.x1 + 7.62, y1: content.y1 + 7.62 };
+    drawings.push([
+      "rectangle",
+      ["start", num(f.x0), num(f.y0)],
+      ["end", num(f.x1), num(f.y1)],
+      ["stroke", ["width", "0"], ["type", "solid"]],
+      ["fill", ["type", "none"]],
+      ["uuid", q(stableUuid("frame"))],
+    ]);
+    drawings.push([
+      "text",
+      q(intent.title),
+      ["exclude_from_sim", "no"],
+      at(f.x0, f.y0 - 2.54, 0),
+      ["effects", ["font", ["size", "1.778", "1.778"]], ["justify", "left", "bottom"]],
+      ["uuid", q(stableUuid("title"))],
+    ]);
+    content = { x0: f.x0, y0: f.y0 - 5.5, x1: Math.max(f.x1, f.x0 + intent.title.length * 1.7), y1: f.y1 };
+  }
+
   const box = content ?? { x0: 0, y0: 0, x1: 0, y1: 0 };
   const paper: Layout["paper"] = box.x1 + 20 > 297 || box.y1 + 20 > 210 ? "A3" : "A4";
   const libSymbols: Node[] = ["lib_symbols", ...[...used].sort().map((libId) => lib.get(libId).embedded)];
@@ -252,6 +315,8 @@ export function emit(
     ["paper", q(paper)],
     ["title_block", ["title", q(intent.title)]],
     libSymbols,
+    ...drawings,
+    ...junctions,
     ...noConnects,
     ...wires,
     ...labels,
@@ -264,6 +329,7 @@ export function emit(
     sch: write(file) + "\n",
     layout: {
       paper,
+      wiring: wiring ? "wires" : "labels",
       sheet: paper === "A4" ? { w: 297, h: 210 } : { w: 420, h: 297 },
       content: rect(box),
       parts,

@@ -16,8 +16,8 @@ export function checkRules(intent: Intent, lib: SymbolLibrary): RuleResult[] {
   for (const n of intent.nets) for (const p of n.pins) netOfPin.set(p, n.name);
   const pinsOfNet = new Map(intent.nets.map((n) => [n.name, n.pins]));
   const part = new Map(intent.parts.map((p) => [p.ref, p]));
-  const netByName = (ref: string, libId: string, pinName: string) => {
-    const pin = lib.get(libId).pins.find((p) => p.name === pinName);
+  const netByName = (ref: string, libId: string, pinNames: string[]) => {
+    const pin = lib.get(libId).pins.find((p) => pinNames.includes(p.name));
     return pin ? netOfPin.get(`${ref}.${pin.number}`) : undefined;
   };
   /** Refs of capacitors with one pin on each of the two nets. */
@@ -32,9 +32,9 @@ export function checkRules(intent: Intent, lib: SymbolLibrary): RuleResult[] {
 
   const out: RuleResult[] = [];
   for (const reg of intent.parts.filter((p) => p.libId.startsWith("Regulator_Linear:"))) {
-    const vin = netByName(reg.ref, reg.libId, "VI");
-    const vout = netByName(reg.ref, reg.libId, "VO");
-    const gnd = netByName(reg.ref, reg.libId, "GND");
+    const vin = netByName(reg.ref, reg.libId, ["VI", "VIN", "IN"]);
+    const vout = netByName(reg.ref, reg.libId, ["VO", "VOUT", "OUT"]);
+    const gnd = netByName(reg.ref, reg.libId, ["GND"]);
     for (const [rule, net, side] of [
       ["reg_input_cap", vin, "input"],
       ["reg_output_cap", vout, "output"],

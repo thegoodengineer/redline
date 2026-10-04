@@ -3,6 +3,7 @@ import { SymbolLibrary } from "./symbols";
 
 export const PART_IDS = [
   "Regulator_Linear:AMS1117-3.3",
+  "Regulator_Linear:MIC5317-3.3xM5",
   "Device:C",
   "Device:C_Polarized",
   "Device:R",
@@ -10,6 +11,7 @@ export const PART_IDS = [
   "Device:D_Schottky",
   "Device:Polyfuse",
   "Connector_Generic:Conn_01x02",
+  "Connector_Generic_MountingPin:Conn_01x02_MountingPin",
   "Switch:SW_Push",
 ] as const;
 
@@ -25,6 +27,8 @@ export const PWR_FLAG = "power:PWR_FLAG";
 /** What the library pin names do not say. */
 const NOTES: Record<string, string> = {
   "Device:C_Polarized": "pin 1 is the positive terminal",
+  "Regulator_Linear:MIC5317-3.3xM5": "MIC5317-3.3YM5, 150 mA LDO; tie EN (3) to VIN to enable; NC (4) goes in noConnect; 1uF ceramic on input and output",
+  "Connector_Generic_MountingPin:Conn_01x02_MountingPin": "for SMD connectors such as JST GH SM02B-GHS-TB; the mounting pin MP goes in noConnect unless asked otherwise",
   "Device:LED": "current flows from A (2) to K (1)",
   "Device:D_Schottky": "current flows from A (2) to K (1)",
 };

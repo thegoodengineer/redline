@@ -6,7 +6,10 @@
     "draft": "tsx scripts/draft.ts",
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "eval": "tsx scripts/eval.ts",
+    "shots": "node scripts/shoot-all.mjs"
   },
   "keywords": [],
   "author": "",

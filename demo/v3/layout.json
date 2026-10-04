@@ -1,147 +1,148 @@
 {
   "paper": "A4",
+  "wiring": "wires",
   "sheet": {
     "w": 297,
     "h": 210
   },
   "content": {
-    "x": 25.68,
-    "y": 31.104,
-    "w": 120.52,
-    "h": 96.796
+    "x": 18.06,
+    "y": 10.364,
+    "w": 230.86,
+    "h": 73.086
   },
   "parts": {
     "J1": {
-      "x": 35.56,
+      "x": 33.02,
       "y": 35.56,
       "w": 6.35,
       "h": 5.08,
       "full": {
-        "x": 31.22,
+        "x": 31.29,
         "y": 31.16,
-        "w": 12.42,
-        "h": 12.92
+        "w": 10.62,
+        "h": 9.48
       }
     },
     "C1": {
-      "x": 38.354,
-      "y": 59.69,
+      "x": 54.864,
+      "y": 39.37,
       "w": 4.572,
       "h": 7.62,
       "full": {
-        "x": 38.354,
-        "y": 52.694,
+        "x": 54.864,
+        "y": 36.83,
         "w": 10.642,
-        "h": 21.866
+        "h": 12.7
       }
     },
     "F1": {
-      "x": 39.116,
-      "y": 90.17,
+      "x": 78.486,
+      "y": 39.37,
       "w": 3.048,
       "h": 7.62,
       "full": {
-        "x": 38.84,
-        "y": 83.174,
-        "w": 10.594,
-        "h": 17.456
+        "x": 78.486,
+        "y": 36.83,
+        "w": 10.318,
+        "h": 12.7
       }
     },
     "C2": {
-      "x": 72.644,
-      "y": 35.56,
+      "x": 101.854,
+      "y": 39.37,
       "w": 4.572,
       "h": 7.62,
       "full": {
-        "x": 72.644,
-        "y": 31.12,
+        "x": 101.854,
+        "y": 36.83,
         "w": 10.642,
-        "h": 19.31
+        "h": 12.7
       }
     },
     "U1": {
-      "x": 67.31,
-      "y": 62.865,
+      "x": 128.27,
+      "y": 34.925,
       "w": 15.24,
       "h": 9.525,
       "full": {
-        "x": 60.67,
-        "y": 58.465,
-        "w": 26.82,
-        "h": 21.175
+        "x": 125.73,
+        "y": 30.525,
+        "w": 20.32,
+        "h": 16.465
       }
     },
     "C3": {
-      "x": 72.644,
-      "y": 95.25,
+      "x": 159.004,
+      "y": 39.37,
       "w": 4.572,
       "h": 7.62,
       "full": {
-        "x": 72.53,
-        "y": 88.254,
-        "w": 10.756,
-        "h": 21.866
+        "x": 159.004,
+        "y": 36.83,
+        "w": 10.642,
+        "h": 12.7
       }
     },
     "J2": {
-      "x": 105.41,
+      "x": 185.42,
       "y": 35.56,
       "w": 6.35,
       "h": 5.08,
       "full": {
-        "x": 97.93,
+        "x": 182.88,
         "y": 31.16,
-        "w": 16.76,
-        "h": 12.92
+        "w": 11.82,
+        "h": 9.48
       }
     },
     "R1": {
-      "x": 132.334,
-      "y": 38.1,
+      "x": 208.534,
+      "y": 39.37,
       "w": 2.032,
       "h": 7.62,
       "full": {
-        "x": 130.95,
-        "y": 31.104,
-        "w": 8.9,
-        "h": 17.456
+        "x": 208.534,
+        "y": 36.83,
+        "w": 6.902,
+        "h": 12.7
       }
     },
     "D1": {
-      "x": 128.778,
-      "y": 60.96,
+      "x": 230.378,
+      "y": 35.56,
       "w": 8.382,
       "h": 3.556,
       "full": {
-        "x": 125.2,
-        "y": 56.56,
-        "w": 21,
-        "h": 10.38
+        "x": 228.6,
+        "y": 31.16,
+        "w": 12.7,
+        "h": 7.956
       }
     }
   },
   "flags": [
     {
       "ref": "#FLG01",
-      "net": "+5V",
-      "x": 25.68,
-      "y": 118.48,
-      "w": 16.76,
+      "net": "VIN",
+      "x": 99.34,
+      "y": 29.58,
+      "w": 9.6,
       "h": 4.71
     },
     {
       "ref": "#FLG02",
-      "net": "VIN",
-      "x": 56.16,
-      "y": 118.48,
-      "w": 19.06,
-      "h": 5.01
+      "net": "+5V",
+      "x": 25.68,
+      "y": 66.41,
+      "w": 16.76,
+      "h": 4.71
     },
     {
       "ref": "#FLG03",
       "net": "GND",
-      "x": 86.64,
-      "y": 118.48,
+      "x": 56.16,
+      "y": 66.41,
       "w": 16.76,
       "h": 9.42
     }
@@ -161,40 +162,6 @@
       "kind": "symbol",
       "pin": "2"
     },
-    "a014b550-2ee3-523a-89f4-0d7fa43052d6": {
-      "ref": "J1",
-      "pin": "1",
-      "net": "+5V",
-      "kind": "wire"
-    },
-    "57912a0d-fc76-567f-9c61-c42213643d92": {
-      "ref": "J1",
-      "net": "+5V",
-      "kind": "power"
-    },
-    "154644b9-a803-58c8-8bd6-03b1653839cd": {
-      "ref": "J1",
-      "net": "+5V",
-      "kind": "power",
-      "pin": "1"
-    },
-    "a4e9c91b-7f01-54d7-bd5e-46b49cd76190": {
-      "ref": "J1",
-      "pin": "2",
-      "net": "GND",
-      "kind": "wire"
-    },
-    "7209fd9e-3a2b-53c8-9a00-33edb4b5c2c2": {
-      "ref": "J1",
-      "net": "GND",
-      "kind": "power"
-    },
-    "2c8f383e-6433-5419-bca3-cf1a302cbd10": {
-      "ref": "J1",
-      "net": "GND",
-      "kind": "power",
-      "pin": "1"
-    },
     "b99bace8-03f5-5d2a-b546-effb2393a007": {
       "ref": "C1",
       "kind": "symbol"
@@ -208,40 +175,6 @@
       "ref": "C1",
       "kind": "symbol",
       "pin": "2"
-    },
-    "8bbb6a95-e570-573a-b808-464cafd794b6": {
-      "ref": "C1",
-      "pin": "1",
-      "net": "+5V",
-      "kind": "wire"
-    },
-    "f9618bbf-023e-59bd-b7c4-b5fa36d14494": {
-      "ref": "C1",
-      "net": "+5V",
-      "kind": "power"
-    },
-    "b5008235-c7e1-54e8-a079-d2d1647f41d2": {
-      "ref": "C1",
-      "net": "+5V",
-      "kind": "power",
-      "pin": "1"
-    },
-    "424eaefc-389d-5a61-ac78-65856555c93c": {
-      "ref": "C1",
-      "pin": "2",
-      "net": "GND",
-      "kind": "wire"
-    },
-    "5ab39d9b-05c1-54e2-bd24-146756bcc63d": {
-      "ref": "C1",
-      "net": "GND",
-      "kind": "power"
-    },
-    "5f171087-6227-5974-b128-3884ff991f7a": {
-      "ref": "C1",
-      "net": "GND",
-      "kind": "power",
-      "pin": "1"
     },
     "ace04b66-634b-5eb4-9216-0c3931fbaa7c": {
       "ref": "F1",
@@ -257,35 +190,6 @@
       "kind": "symbol",
       "pin": "2"
     },
-    "611abb50-677e-58f3-a611-7a0863372b18": {
-      "ref": "F1",
-      "pin": "1",
-      "net": "+5V",
-      "kind": "wire"
-    },
-    "7716e946-fc61-5095-a70c-9eac1358c8e4": {
-      "ref": "F1",
-      "net": "+5V",
-      "kind": "power"
-    },
-    "a5a83654-5ff9-5cd9-b7c9-0f20e3dbb888": {
-      "ref": "F1",
-      "net": "+5V",
-      "kind": "power",
-      "pin": "1"
-    },
-    "fa6c3079-1cc4-543d-8c1a-e845226b08a7": {
-      "ref": "F1",
-      "pin": "2",
-      "net": "VIN",
-      "kind": "wire"
-    },
-    "6e1938bc-cff6-598f-9c81-eea93a9119fb": {
-      "ref": "F1",
-      "pin": "2",
-      "net": "VIN",
-      "kind": "label"
-    },
     "b3382816-cdfa-53a6-9cd1-46fc88be51e7": {
       "ref": "C2",
       "kind": "symbol"
@@ -299,35 +203,6 @@
       "ref": "C2",
       "kind": "symbol",
       "pin": "2"
-    },
-    "4f2dbcb1-4f4e-5056-abaf-0206de5d2a82": {
-      "ref": "C2",
-      "pin": "1",
-      "net": "VIN",
-      "kind": "wire"
-    },
-    "0b8081a8-7728-5b15-950c-f598280781f1": {
-      "ref": "C2",
-      "pin": "1",
-      "net": "VIN",
-      "kind": "label"
-    },
-    "e7ce61f2-d472-5fc3-8530-b82f8bd1213f": {
-      "ref": "C2",
-      "pin": "2",
-      "net": "GND",
-      "kind": "wire"
-    },
-    "fb9c3b40-9c79-5773-a75b-8fbffca3d18b": {
-      "ref": "C2",
-      "net": "GND",
-      "kind": "power"
-    },
-    "620b41d8-ac73-5afc-b84b-bdd4780c28ff": {
-      "ref": "C2",
-      "net": "GND",
-      "kind": "power",
-      "pin": "1"
     },
     "1e543ad1-c078-505f-b2a9-cd19f5d9e872": {
       "ref": "U1",
@@ -348,52 +223,6 @@
       "kind": "symbol",
       "pin": "3"
     },
-    "5b7533d9-8d65-569f-958f-cefea847bc76": {
-      "ref": "U1",
-      "pin": "1",
-      "net": "GND",
-      "kind": "wire"
-    },
-    "18b71fda-3a1b-5ec5-8123-c8c27450b886": {
-      "ref": "U1",
-      "net": "GND",
-      "kind": "power"
-    },
-    "af46b8cf-2c02-56bb-a1e6-1086ba5f12b9": {
-      "ref": "U1",
-      "net": "GND",
-      "kind": "power",
-      "pin": "1"
-    },
-    "f13b5339-ffe9-53b8-8f58-f99e68cf41da": {
-      "ref": "U1",
-      "pin": "2",
-      "net": "+3V3",
-      "kind": "wire"
-    },
-    "f78f1913-b607-5976-b835-1281172b9697": {
-      "ref": "U1",
-      "net": "+3V3",
-      "kind": "power"
-    },
-    "0b03fe3e-0b62-5f92-a80e-ff6309aada67": {
-      "ref": "U1",
-      "net": "+3V3",
-      "kind": "power",
-      "pin": "1"
-    },
-    "2994de89-7f32-5171-90af-276fdc9a2624": {
-      "ref": "U1",
-      "pin": "3",
-      "net": "VIN",
-      "kind": "wire"
-    },
-    "903ee768-4657-59b1-bd02-d95d604afe06": {
-      "ref": "U1",
-      "pin": "3",
-      "net": "VIN",
-      "kind": "label"
-    },
     "9e32ff0e-45db-5606-b3b1-ca7e9e80d018": {
       "ref": "C3",
       "kind": "symbol"
@@ -407,40 +236,6 @@
       "ref": "C3",
       "kind": "symbol",
       "pin": "2"
-    },
-    "1bc0fbf9-69ad-5bf1-a3ee-37157cafed7e": {
-      "ref": "C3",
-      "pin": "1",
-      "net": "+3V3",
-      "kind": "wire"
-    },
-    "7e5863fa-ba82-53fb-b166-2b38ec3e36ed": {
-      "ref": "C3",
-      "net": "+3V3",
-      "kind": "power"
-    },
-    "33552068-70a7-5530-ba98-f61a44e7ddda": {
-      "ref": "C3",
-      "net": "+3V3",
-      "kind": "power",
-      "pin": "1"
-    },
-    "727bc7b4-a99d-53b0-975e-b25b38fc4f37": {
-      "ref": "C3",
-      "pin": "2",
-      "net": "GND",
-      "kind": "wire"
-    },
-    "9e2e14d6-94d3-5416-ac02-3c2b00e02e9d": {
-      "ref": "C3",
-      "net": "GND",
-      "kind": "power"
-    },
-    "24615192-358a-5184-993c-1197a66b6f1a": {
-      "ref": "C3",
-      "net": "GND",
-      "kind": "power",
-      "pin": "1"
     },
     "10959ccf-0e74-522a-9ca6-a0360d1af1f1": {
       "ref": "J2",
@@ -456,40 +251,6 @@
       "kind": "symbol",
       "pin": "2"
     },
-    "9bd1ff72-364e-5d59-8ef1-fb4efdbb83d6": {
-      "ref": "J2",
-      "pin": "1",
-      "net": "+3V3",
-      "kind": "wire"
-    },
-    "055f9af5-33a3-5e3b-832f-5edeb779b522": {
-      "ref": "J2",
-      "net": "+3V3",
-      "kind": "power"
-    },
-    "63c17b99-9aab-5aba-82a1-e45d0f7e0b7d": {
-      "ref": "J2",
-      "net": "+3V3",
-      "kind": "power",
-      "pin": "1"
-    },
-    "83177836-e58d-584f-bfcc-9813c9d39c0a": {
-      "ref": "J2",
-      "pin": "2",
-      "net": "GND",
-      "kind": "wire"
-    },
-    "016f71b3-0127-5eb7-9175-518729f4197c": {
-      "ref": "J2",
-      "net": "GND",
-      "kind": "power"
-    },
-    "8b98cbdd-628f-5b2d-bc0e-567639be9b54": {
-      "ref": "J2",
-      "net": "GND",
-      "kind": "power",
-      "pin": "1"
-    },
     "686effa5-54a7-507e-b6e8-df398beccf5a": {
       "ref": "R1",
       "kind": "symbol"
@@ -503,35 +264,6 @@
       "ref": "R1",
       "kind": "symbol",
       "pin": "2"
-    },
-    "48da59f6-857c-5001-8aa7-166a9ed2a50f": {
-      "ref": "R1",
-      "pin": "1",
-      "net": "+3V3",
-      "kind": "wire"
-    },
-    "bbb80ace-6166-5705-929a-98b6829f53b0": {
-      "ref": "R1",
-      "net": "+3V3",
-      "kind": "power"
-    },
-    "215d1d2f-9bdc-56f7-9b6c-3dab233a6081": {
-      "ref": "R1",
-      "net": "+3V3",
-      "kind": "power",
-      "pin": "1"
-    },
-    "c65025d5-ec67-5580-ba71-3bd4a9784193": {
-      "ref": "R1",
-      "pin": "2",
-      "net": "LED_A",
-      "kind": "wire"
-    },
-    "d100d055-3075-5171-a124-2943998acd7f": {
-      "ref": "R1",
-      "pin": "2",
-      "net": "LED_A",
-      "kind": "label"
     },
     "d0ecbde3-b487-5816-a0a1-129247f1f0a4": {
       "ref": "D1",
@@ -547,82 +279,351 @@
       "kind": "symbol",
       "pin": "2"
     },
-    "ca6652d2-1679-555c-910a-b19f304bbcd0": {
-      "ref": "D1",
-      "pin": "1",
+    "b58fe38a-35d2-55af-9eb2-d5a3702ebc15": {
+      "ref": "J1",
+      "net": "+5V",
+      "kind": "wire"
+    },
+    "23d46c26-d7f4-53ff-b38a-55d74329059a": {
+      "ref": "J1",
+      "net": "+5V",
+      "kind": "wire"
+    },
+    "4f75bb04-4808-57ac-a6f1-1df45c1d8b4a": {
+      "ref": "J1",
+      "net": "+5V",
+      "kind": "wire"
+    },
+    "309366c9-4676-5fff-a16e-b4d74c14b9df": {
+      "ref": "J1",
+      "net": "+5V",
+      "kind": "wire"
+    },
+    "b521e44f-0e28-5e2b-a287-ad9d5c74f515": {
+      "ref": "J1",
+      "net": "+5V",
+      "kind": "wire"
+    },
+    "c543a623-f29b-5e88-8eb8-8f7d9d168f0b": {
+      "ref": "F1",
+      "net": "VIN",
+      "kind": "wire"
+    },
+    "65e05dc3-a7dc-5b5d-8da0-a3898514d6d7": {
+      "ref": "F1",
+      "net": "VIN",
+      "kind": "wire"
+    },
+    "af39f134-b7a6-5776-b71e-ec8ca9bb9e0c": {
+      "ref": "F1",
+      "net": "VIN",
+      "kind": "wire"
+    },
+    "3af0a2bc-3e5f-5343-8b35-282dd9cd2200": {
+      "ref": "F1",
+      "net": "VIN",
+      "kind": "wire"
+    },
+    "b39352de-16dc-5734-9ec9-792e6cab5de9": {
+      "ref": "F1",
+      "net": "VIN",
+      "kind": "wire"
+    },
+    "4488f62a-b967-5374-8330-1b5b7416cd90": {
+      "ref": "F1",
+      "net": "VIN",
+      "kind": "wire"
+    },
+    "e795690b-f9df-5d73-8283-65f5315622f3": {
+      "ref": "F1",
+      "net": "VIN",
+      "kind": "wire"
+    },
+    "a8e1bb14-6416-5bf3-adfd-39111bbdfd73": {
+      "ref": "J1",
       "net": "GND",
       "kind": "wire"
     },
-    "ba9c1714-98dd-5274-8058-f185384e3e18": {
-      "ref": "D1",
+    "2e360464-7b75-58ec-8fb9-962d49708340": {
+      "ref": "J1",
+      "net": "GND",
+      "kind": "wire"
+    },
+    "221d4e51-6256-5038-b53f-606b1fd65956": {
+      "ref": "J1",
+      "net": "GND",
+      "kind": "wire"
+    },
+    "0915072f-2fcd-5465-b2ff-8c6011a841dc": {
+      "ref": "J1",
+      "net": "GND",
+      "kind": "wire"
+    },
+    "e47c1967-9a79-5219-8d63-f759943a70e1": {
+      "ref": "J1",
+      "net": "GND",
+      "kind": "wire"
+    },
+    "935af82c-45fd-57e4-bd91-2aab63229ea3": {
+      "ref": "J1",
+      "net": "GND",
+      "kind": "wire"
+    },
+    "20444a7b-8c49-52cf-aebc-c50177937cb4": {
+      "ref": "J1",
+      "net": "GND",
+      "kind": "wire"
+    },
+    "336390ad-45aa-5f47-86ba-170d20caf6ba": {
+      "ref": "J1",
+      "net": "GND",
+      "kind": "wire"
+    },
+    "99589bcd-a7aa-5156-be58-9a85d62407cb": {
+      "ref": "J1",
+      "net": "GND",
+      "kind": "wire"
+    },
+    "2a57cb24-6534-5cfe-96b0-3b3a6737bad9": {
+      "ref": "J1",
+      "net": "GND",
+      "kind": "wire"
+    },
+    "4936b416-cd29-5db6-8ff1-71bed49469f8": {
+      "ref": "J1",
+      "net": "GND",
+      "kind": "wire"
+    },
+    "ba35e433-9726-50c1-8921-f3fdc91b4c94": {
+      "ref": "J1",
+      "net": "GND",
+      "kind": "wire"
+    },
+    "c728cbd3-8e2d-5b72-a84a-86bd9474b1fb": {
+      "ref": "J1",
+      "net": "GND",
+      "kind": "wire"
+    },
+    "16398db9-8241-52a9-b964-c5a692d33da3": {
+      "ref": "J1",
+      "net": "GND",
+      "kind": "wire"
+    },
+    "593af742-850b-5ae1-9e6a-7be7fb1df989": {
+      "ref": "J1",
+      "net": "GND",
+      "kind": "wire"
+    },
+    "da4022a1-f974-54ec-93e7-f664583964f0": {
+      "ref": "J1",
+      "net": "GND",
+      "kind": "wire"
+    },
+    "f6c92a35-7b32-5b56-89a0-7537423ff808": {
+      "ref": "J1",
+      "net": "GND",
+      "kind": "wire"
+    },
+    "e2373f62-adb0-5fc7-b219-71bea5faf3b7": {
+      "ref": "J1",
+      "net": "GND",
+      "kind": "wire"
+    },
+    "c98635b2-65c6-517f-abf5-d8495cc41af1": {
+      "ref": "J1",
+      "net": "GND",
+      "kind": "wire"
+    },
+    "fedc27fd-6543-5b17-a702-b98674c9fc38": {
+      "ref": "J1",
+      "net": "GND",
+      "kind": "wire"
+    },
+    "2d2b2305-225a-58f0-bb39-3d341c95bd45": {
+      "ref": "U1",
+      "net": "+3V3",
+      "kind": "wire"
+    },
+    "37224d90-fb7e-52b4-9cdb-02e271570da2": {
+      "ref": "U1",
+      "net": "+3V3",
+      "kind": "wire"
+    },
+    "99bc8a7e-960a-5e7f-835e-f14803dd51c6": {
+      "ref": "U1",
+      "net": "+3V3",
+      "kind": "wire"
+    },
+    "866815e2-5d8a-52cf-8d59-ed1a99a1fc20": {
+      "ref": "U1",
+      "net": "+3V3",
+      "kind": "wire"
+    },
+    "287c49cc-0635-57ac-9812-229ecd816155": {
+      "ref": "U1",
+      "net": "+3V3",
+      "kind": "wire"
+    },
+    "fddc9995-2ced-5c78-96c3-647fe9b3e8f6": {
+      "ref": "U1",
+      "net": "+3V3",
+      "kind": "wire"
+    },
+    "438549c8-9be1-5b18-91c6-020677211c6f": {
+      "ref": "U1",
+      "net": "+3V3",
+      "kind": "wire"
+    },
+    "29e39a51-2ce8-5807-a1f6-c9d3d10e461a": {
+      "ref": "U1",
+      "net": "+3V3",
+      "kind": "wire"
+    },
+    "24e86dd7-3db9-511e-9284-520066c4da2d": {
+      "ref": "R1",
+      "net": "LED_A",
+      "kind": "wire"
+    },
+    "f10c91f8-f475-5042-886f-95e7e83c5c8c": {
+      "ref": "R1",
+      "net": "LED_A",
+      "kind": "wire"
+    },
+    "f5a0907b-6c86-5729-8916-c982a9a8926b": {
+      "ref": "R1",
+      "net": "LED_A",
+      "kind": "wire"
+    },
+    "2db1c1d8-7059-537b-acbe-c3d4dfe4191f": {
+      "ref": "R1",
+      "net": "LED_A",
+      "kind": "wire"
+    },
+    "6089a850-cefe-5ece-a2f7-5a548f126026": {
+      "ref": "J1",
+      "net": "+5V",
+      "kind": "junction"
+    },
+    "584d3008-6f82-589b-aca4-2d8f7a46a5d4": {
+      "ref": "F1",
+      "net": "VIN",
+      "kind": "junction"
+    },
+    "66ae811e-4c2f-557f-8c98-5dabd6c151d7": {
+      "ref": "J1",
+      "net": "GND",
+      "kind": "junction"
+    },
+    "d5caf01f-6b82-5e55-9cf5-8c5920ffb45e": {
+      "ref": "J1",
+      "net": "GND",
+      "kind": "junction"
+    },
+    "f55e4505-0876-5429-aeae-a77a603dcdb5": {
+      "ref": "J1",
+      "net": "GND",
+      "kind": "junction"
+    },
+    "6fc4007d-1a72-50bd-9834-ccc67dc03651": {
+      "ref": "J1",
+      "net": "GND",
+      "kind": "junction"
+    },
+    "69e852f7-097f-5fa6-8c37-1fa174c16da2": {
+      "ref": "J1",
+      "net": "GND",
+      "kind": "junction"
+    },
+    "d1900d27-ebd6-591c-96cd-83ec2cc7c0d5": {
+      "ref": "J1",
+      "net": "GND",
+      "kind": "junction"
+    },
+    "a66a593e-c154-51e3-8b9e-c61e3b5084e3": {
+      "ref": "U1",
+      "net": "+3V3",
+      "kind": "junction"
+    },
+    "e4f2f859-aa5b-5677-83b7-a80570c61325": {
+      "ref": "U1",
+      "net": "+3V3",
+      "kind": "junction"
+    },
+    "1900c909-0dc4-5c11-be53-0b657054fbe9": {
+      "ref": "U1",
+      "net": "+3V3",
+      "kind": "junction"
+    },
+    "284c9872-0270-5da7-9bb1-02fdf4c5c345": {
+      "ref": "J1",
+      "net": "+5V",
+      "kind": "power"
+    },
+    "ad2bdcf1-099e-5b07-9f98-65a543898646": {
+      "ref": "J1",
+      "net": "+5V",
+      "kind": "power",
+      "pin": "1"
+    },
+    "739c3822-2da3-5589-90d5-187ae489d00c": {
+      "ref": "J1",
       "net": "GND",
       "kind": "power"
     },
-    "efe78754-c177-5e10-ae42-27a8be7527f6": {
-      "ref": "D1",
+    "514c039e-5aac-5d82-a0fe-180dbcd69822": {
+      "ref": "J1",
       "net": "GND",
       "kind": "power",
       "pin": "1"
     },
-    "851ec66d-dc33-5867-8f81-334a386a60ae": {
-      "ref": "D1",
-      "pin": "2",
-      "net": "LED_A",
-      "kind": "wire"
+    "4076b3c3-f40b-5336-9bd1-a8413d90a78a": {
+      "ref": "U1",
+      "net": "+3V3",
+      "kind": "power"
     },
-    "fc6f298f-1a9b-58ef-bef5-37d06fb6fb3b": {
-      "ref": "D1",
-      "pin": "2",
-      "net": "LED_A",
-      "kind": "label"
+    "60e057f1-30cc-52ff-a414-248f8700f3b6": {
+      "ref": "U1",
+      "net": "+3V3",
+      "kind": "power",
+      "pin": "1"
+    },
+    "6d0911ee-0928-5d42-8b3f-48acc5292689": {
+      "ref": "#FLG01",
+      "net": "VIN",
+      "kind": "flag"
+    },
+    "ea5a1d1a-a4ba-5d8a-9a94-1b40f6deb5a1": {
+      "ref": "#FLG01",
+      "net": "VIN",
+      "kind": "flag",
+      "pin": "1"
     },
     "2684dc89-d2b3-56a7-950e-3d43267e6895": {
-      "ref": "#FLG01",
+      "ref": "#FLG02",
       "net": "+5V",
       "kind": "flag"
     },
     "183e4547-7a21-5677-ad47-1b3923d90337": {
-      "ref": "#FLG01",
+      "ref": "#FLG02",
       "net": "+5V",
       "kind": "flag",
       "pin": "1"
     },
     "3474b413-c458-5ed7-9f29-558790658b63": {
-      "ref": "#FLG01",
+      "ref": "#FLG02",
       "net": "+5V",
       "kind": "wire"
     },
     "a2651354-6595-551a-92eb-c9d6ebe56bca": {
-      "ref": "#FLG01",
+      "ref": "#FLG02",
       "net": "+5V",
       "kind": "power"
     },
     "290f688d-9e89-5355-b2ec-ccbc59253c4c": {
-      "ref": "#FLG01",
+      "ref": "#FLG02",
       "net": "+5V",
       "kind": "power",
       "pin": "1"
-    },
-    "6d0911ee-0928-5d42-8b3f-48acc5292689": {
-      "ref": "#FLG02",
-      "net": "VIN",
-      "kind": "flag"
-    },
-    "ea5a1d1a-a4ba-5d8a-9a94-1b40f6deb5a1": {
-      "ref": "#FLG02",
-      "net": "VIN",
-      "kind": "flag",
-      "pin": "1"
-    },
-    "fd54c7be-f00d-57fa-b8f8-e105535131d0": {
-      "ref": "#FLG02",
-      "net": "VIN",
-      "kind": "wire"
-    },
-    "a6393780-f576-5859-a9a4-9937f0fc6495": {
-      "ref": "#FLG02",
-      "net": "VIN",
-      "kind": "label"
     },
     "4108e620-d662-5f89-a019-18d4f3a32f8a": {
       "ref": "#FLG03",

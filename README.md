@@ -14,6 +14,19 @@ cannot easily see what is wrong with it.
 
 The model writes a tiny intent. Code draws everything. KiCad is the judge.
 
+```mermaid
+flowchart LR
+  U[You: describe or ask for a change] --> M[Gemma 4 writes the intent<br/>parts and nets, no coordinates]
+  M --> V{Validator}
+  V -- findings, one retry --> M
+  V --> E[Engine<br/>place, route wires, emit .kicad_sch]
+  E --> K[kicad-cli<br/>ERC and SVG]
+  E --> R[Design rules in code]
+  K --> S[Studio<br/>findings marked on the sheet, diff, versions]
+  R --> S
+  S -- Fix this / Fix all --> M
+```
+
 1. **Intent.** Gemma 4 returns a small JSON object: parts (`ref`, `libId`, `value`, `group`), nets (lists of pins
    such as `U1.3`), and no-connect pins. It contains no coordinates. It is checked with zod and by a validator
    (unknown symbol, unknown pin, duplicate ref, pin in two nets, pin in no net). If validation fails the model gets
@@ -22,9 +35,13 @@ The model writes a tiny intent. Code draws everything. KiCad is the judge.
    - `sexp`: own s-expression parser and writer.
    - `symbols`: reads symbol definitions and pin positions from the installed `.kicad_sym` libraries and resolves
      `extends` symbols.
-   - `place`: one column per group, parts stacked inside a column, everything on the 1.27 mm grid.
-   - `connect`: no wire routing. Each pin gets a short stub and a net label; nets named `GND`, `+5V` and `+3V3`
-     get the matching power symbol. Undriven power nets get one `PWR_FLAG`.
+   - `wired` (default style): parts sit in a row in signal-flow order on a common rail line, a connector whose
+     pins face away from the circuit is mirrored, and a grid router draws every net as real wires with junctions.
+     Each rail (`GND`, `+5V`, `+3V3`) gets one power symbol, and the sheet gets its title and a frame. Wires of
+     different nets may only cross at right angles, never touch.
+   - `place` and `connect` (label style, the fallback when a net cannot be routed, or `hints.wiring: "labels"`):
+     one column per group, and each pin gets a short stub with a net label or a power symbol.
+   - Undriven power nets get one `PWR_FLAG` in both styles, because KiCad's ERC requires it.
    - `emit`: writes the `.kicad_sch` with embedded library symbols and stable UUIDs, plus `layout.json` with each
      part's bounding box in sheet millimetres. The same intent always gives the same bytes.
 3. **KiCad.** `kicad-cli sch erc --format json` checks the file and `kicad-cli sch export svg` draws it. The studio
@@ -42,8 +59,9 @@ by the installed KiCad 10 with `kicad-cli sch upgrade`, and every change was che
 
 ### Catalogue
 
-`Regulator_Linear:AMS1117-3.3`, `Device:C`, `Device:C_Polarized`, `Device:R`, `Device:LED`, `Device:D_Schottky`,
-`Device:Polyfuse`, `Connector_Generic:Conn_01x02`, `Switch:SW_Push`, and the power symbols `power:+5V`,
+`Regulator_Linear:AMS1117-3.3`, `Regulator_Linear:MIC5317-3.3xM5`, `Device:C`, `Device:C_Polarized`, `Device:R`,
+`Device:LED`, `Device:D_Schottky`, `Device:Polyfuse`, `Connector_Generic:Conn_01x02`,
+`Connector_Generic_MountingPin:Conn_01x02_MountingPin`, `Switch:SW_Push`, and the power symbols `power:+5V`,
 `power:+3V3`, `power:GND`, `power:PWR_FLAG`. The catalogue text the model sees (pin numbers, names, electrical
 types) is generated from the parsed library files: `npx tsx scripts/catalogue.ts`.
 
@@ -68,7 +86,8 @@ Copy `.env.example` to `.env.local` and set `GEMINI_API_KEY`. KiCad is located a
 npm run dev
 ```
 
-Then open http://localhost:3000. `/studio` is the app. `/studio?demo=1` replays a recorded session from `demo/`
+Then open http://localhost:3000. The app runs locally only, because it needs `kicad-cli` on the same machine.
+`/studio` is the app. `/studio?demo=1` replays a recorded session from `demo/`
 with no API or kicad-cli calls.
 
 Without the UI:
@@ -78,6 +97,7 @@ npx tsx scripts/draft.ts examples/reg-3v3.intent.json
 ```
 
 drafts the hand-written 5 V to 3.3 V regulator (no model) into `runs/reg-3v3/v1/` and prints the kicad-cli output.
+`examples/mic5317-3v3.intent.json` is the same job with a MIC5317-3.3YM5 and JST GH connectors.
 
 ```bash
 npm test
@@ -91,7 +111,8 @@ Each version of a session is stored in `runs/<session>/v<n>/` as `intent.json`, 
 ## Eval
 
 `scripts/eval.ts` drafts the 10 prompts in `data/prompts.json` with live Gemma, waits between calls, and gives any
-draft that is not clean one fix round. Run of 4 October 2026, `gemma-4-31b-it`, minimal thinking, KiCad 10.0.4:
+draft that is not clean one fix round. Run of 4 October 2026 on the wired engine, `gemma-4-31b-it`, minimal
+thinking, KiCad 10.0.4:
 
 | Measure | Result |
 | --- | --- |
@@ -99,9 +120,10 @@ draft that is not clean one fix round. Run of 4 October 2026, `gemma-4-31b-it`, 
 | ERC-clean after one fix round | 10 / 10 |
 | ERC and design rules clean first time | 10 / 10 |
 | Drafts that needed the validation retry | 0 / 10 |
+| Drafts drawn with routed wires (no fallback to labels) | 10 / 10 |
 | Prompts lost to API errors | 0 / 10 |
-| Tokens per draft (average) | 1,548 |
-| Model time per draft (min / average / max) | 30 s / 58 s / 111 s |
+| Tokens per draft (average) | 1,890 |
+| Model time per draft (min / average / max) | 31 s / 66 s / 198 s |
 
 Read these numbers with care:
 
@@ -111,7 +133,8 @@ Read these numbers with care:
   circuit is what was asked for; nobody reviewed the ten circuits by hand.
 - No draft needed the fix round, so this run does not measure it. The fix path was exercised separately in the
   studio (a removed capacitor and a removed LED resistor were both repaired in one round).
-- Six of the ten calls hit a 500 or 503 from the hosted model and succeeded on retry.
+- The hosted model answered 500 or 503 four times during the run; every call succeeded on retry.
+- An earlier run on the label-style engine gave the same 10 / 10.
 
 The raw output is in `data/eval-output.txt` and the per-prompt results in `data/eval-results.json`.
 
@@ -119,11 +142,19 @@ The raw output is in `data/eval-output.txt` and the per-prompt results in `data/
 npx tsx scripts/eval.ts
 ```
 
+## More
+
+- [docs/STACK.md](docs/STACK.md): the choice and the reason for every layer, and the one-command tasks.
+- [docs/LEARNINGS.md](docs/LEARNINGS.md): dated notes on what went wrong and what we changed.
+
 ## Limits
 
-- Twelve-symbol catalogue; anything else is rejected by the validator.
-- No wire routing: connections are labels and power symbols, which is valid KiCad but not how a person would draw a
-  dense sheet.
+- Small catalogue (eleven parts plus power symbols); anything else is rejected by the validator.
+- The wire router is simple. It is tidy for a row of parts such as a regulator block; on busier circuits the wires
+  are correct but can take roundabout paths. Parts are drawn in the order the intent lists them.
+- The eval prompts do not use the two newer parts (MIC5317, mounting-pin connector); those were checked by hand
+  and by the acceptance tests.
+- KiCad's mounting-pin connector symbol has one mounting pin; the JST GH part has two pads.
 - The design rules are three checks, not a review.
 - The hosted Gemma endpoint was slow (40 to 110 s per call) and returned occasional 500/503 errors during
   development; the provider retries twice.
