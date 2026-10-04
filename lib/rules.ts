@@ -10,6 +10,8 @@ export interface RuleResult {
 }
 
 const CAPS = ["Device:C", "Device:C_Polarized"];
+/** Two-terminal parts that current passes straight through. */
+const SERIES_PASS = ["Switch:SW_Push", "Device:Polyfuse", "Device:D_Schottky", "Device:LED"];
 
 export function checkRules(intent: Intent, lib: SymbolLibrary): RuleResult[] {
   const netOfPin = new Map<string, string>();
@@ -61,15 +63,24 @@ export function checkRules(intent: Intent, lib: SymbolLibrary): RuleResult[] {
   }
 
   for (const led of intent.parts.filter((p) => p.libId === "Device:LED")) {
-    // Series: a net shared by exactly one LED pin and one resistor pin, and not a rail.
+    // Series: walk out of each LED pin through nets that join exactly two pins (so all the
+    // current must pass), through switches, fuses and diodes, until a resistor or a branch.
     let resistor: string | undefined;
-    for (const pin of ["1", "2"]) {
-      const net = netOfPin.get(`${led.ref}.${pin}`);
-      const pins = net ? pinsOfNet.get(net) ?? [] : [];
-      if (!net || POWER_NETS[net] || pins.length !== 2) continue;
-      const other = pins.find((p) => !p.startsWith(`${led.ref}.`));
-      const ref = other?.split(".")[0];
-      if (ref && part.get(ref)?.libId === "Device:R") resistor = ref;
+    for (const start of ["1", "2"]) {
+      let ref = led.ref;
+      let pin = start;
+      for (let hop = 0; hop < 8 && !resistor; hop++) {
+        const net = netOfPin.get(`${ref}.${pin}`);
+        const pins = net ? pinsOfNet.get(net) ?? [] : [];
+        if (!net || POWER_NETS[net] || pins.length !== 2) break;
+        const other = pins.find((p) => p !== `${ref}.${pin}`)!;
+        const next = part.get(other.split(".")[0]);
+        if (!next) break;
+        if (next.libId === "Device:R") resistor = next.ref;
+        else if (!SERIES_PASS.includes(next.libId)) break;
+        ref = next.ref;
+        pin = other.split(".")[1] === "1" ? "2" : "1";
+      }
     }
     out.push({
       rule: "led_series_resistor",

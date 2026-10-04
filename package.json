@@ -9,7 +9,8 @@
     "start": "next start",
     "typecheck": "tsc --noEmit",
     "eval": "tsx scripts/eval.ts",
-    "shots": "node scripts/shoot-all.mjs"
+    "shots": "node scripts/shoot-all.mjs",
+    "golden": "tsx scripts/golden.ts"
   },
   "keywords": [],
   "author": "",

@@ -43,6 +43,11 @@ Busier circuits route correctly but less neatly.
 edge it must be mirrored, or every wire has to go around it. The engine mirrors a part when all its side pins face
 away from the parts it connects to.
 
+**ERC-clean is not the same as correct.** A reversed LED or a pull-up where a pull-down was asked for passes ERC.
+Hand-written golden answers per eval prompt, matched up to renaming, close that gap. Writing them also caught a bug
+in our own design rule: with a button between the resistor and the LED, "LED has a series resistor" wrongly failed.
+The rule now follows the series path.
+
 **Git Bash here-documents ate backslashes** in two patch scripts on Windows, silently breaking a regular
 expression. Patches are now written as files, not piped through the shell.
 

@@ -110,6 +110,16 @@ describe("design rules", () => {
     direct.nets.find((n) => n.name === "+5V")!.pins.push("D2.2");
     direct.nets.find((n) => n.name === "LED_A")!.pins = ["R1.2"];
     expect(status(direct)).toEqual({ led_series_resistor: false });
+    // a switch between the resistor and the LED is still a series path
+    const viaSwitch = clone(led);
+    viaSwitch.nets = [
+      { name: "+5V", pins: ["J1.1", "F1.1", "D1.1", "R1.1", "R2.1", "J2.1"] },
+      { name: "A", pins: ["R1.2", "SW1.1"] },
+      { name: "B", pins: ["SW1.2", "D2.2"] },
+      { name: "GND", pins: ["D2.1", "J1.2", "F1.2", "D1.2", "R2.2"] },
+    ];
+    viaSwitch.noConnect = ["J2.2"];
+    expect(status(viaSwitch)).toEqual({ led_series_resistor: true });
   });
 });
 

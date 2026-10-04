@@ -111,7 +111,15 @@ Each version of a session is stored in `runs/<session>/v<n>/` as `intent.json`, 
 ## Eval
 
 `scripts/eval.ts` drafts the 10 prompts in `data/prompts.json` with live Gemma, waits between calls, and gives any
-draft that is not clean one fix round. Run of 4 October 2026 on the wired engine, `gemma-4-31b-it`, minimal
+draft that is not clean one fix round. Each draft is judged two ways:
+
+- **KiCad ERC and the design rules** say whether the sheet is electrically consistent.
+- **Golden answers** say whether it is the circuit that was asked for. `data/golden.ts` holds a hand-written
+  reference circuit for every prompt, with the valid variants (a resistor on either side of its LED, a fuse before
+  or after a diode). The matcher in `lib/golden.ts` ignores the model's choice of refs and net names, requires the
+  rails to be named, and reports a draft as exact, as a superset (the reference circuit plus extra parts), or as a
+  mismatch with the reason. A reversed LED passes ERC and fails here.
+ Run of 4 October 2026 on the wired engine, `gemma-4-31b-it`, minimal
 thinking, KiCad 10.0.4:
 
 | Measure | Result |
@@ -119,6 +127,7 @@ thinking, KiCad 10.0.4:
 | ERC-clean first time (0 errors, 0 warnings) | 10 / 10 |
 | ERC-clean after one fix round | 10 / 10 |
 | ERC and design rules clean first time | 10 / 10 |
+| Matches the golden answer first time | 10 / 10, all exact |
 | Drafts that needed the validation retry | 0 / 10 |
 | Drafts drawn with routed wires (no fallback to labels) | 10 / 10 |
 | Prompts lost to API errors | 0 / 10 |
@@ -130,7 +139,10 @@ Read these numbers with care:
 - The prompts are short and stay inside the catalogue. They are not a hard test.
 - Much of the ERC result is the engine's doing, not the model's: it adds `PWR_FLAG` where needed and the validator
   refuses any intent with an unassigned pin. ERC-clean means the file is electrically consistent, not that the
-  circuit is what was asked for; nobody reviewed the ten circuits by hand.
+  circuit is what was asked for; the golden answers are what check that.
+- The golden answers were written by the same people who wrote the prompts, and they check connections, part types
+  and one requested value (the 10k pull-down). They do not check other component values, and they were scored on
+  the saved drafts of this run with `npx tsx scripts/golden.ts`, not during it.
 - No draft needed the fix round, so this run does not measure it. The fix path was exercised separately in the
   studio (a removed capacitor and a removed LED resistor were both repaired in one round).
 - The hosted model answered 500 or 503 four times during the run; every call succeeded on retry.

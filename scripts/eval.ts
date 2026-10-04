@@ -3,6 +3,8 @@
 // time and after the fix round, and writes data/eval-results.json.
 // Usage: npx tsx scripts/eval.ts [--limit N] [--delay seconds]
 import { readFileSync, writeFileSync } from "node:fs";
+import { GOLDEN } from "../data/golden";
+import { GoldenResult, matchGolden } from "../lib/golden";
 import { GemmaProvider } from "../lib/model/provider";
 import { fixRequest, generate, revise, Turn } from "../lib/session";
 
@@ -17,6 +19,9 @@ interface Row {
   session: string;
   first: { drafted: boolean; ercErrors: number | null; ercWarnings: number | null; ruleFailures: number | null; validationRetry: boolean; tokens: number; ms: number };
   fixRound: null | { drafted: boolean; ercErrors: number | null; ercWarnings: number | null; ruleFailures: number | null; tokens: number; ms: number };
+  /** Does the draft contain the hand-written reference circuit for this prompt? */
+  golden?: GoldenResult;
+  goldenAfterFix?: GoldenResult;
   error?: string;
 }
 
@@ -59,6 +64,8 @@ async function main() {
     try {
       const first = await attempt(() => generate(session, prompt, provider));
       row.first = { ...summarize(first), validationRetry: (first.ok ? first.meta.attempts : first.attempts) > 1 };
+      if (first.ok && GOLDEN[i]) row.golden = matchGolden(first.intent, GOLDEN[i]);
+      if (row.golden) console.log(`    golden: ${row.golden.match}${row.golden.reason ? " (" + row.golden.reason + ")" : ""}${row.golden.extraParts.length ? " extra parts " + row.golden.extraParts.join(", ") : ""}`);
       console.log(
         first.ok
           ? `    first: ERC ${first.meta.erc.errors} errors, ${first.meta.erc.warnings} warnings, ${row.first.ruleFailures} rule failures, ${row.first.tokens} tokens, ${(row.first.ms / 1000).toFixed(0)} s`
@@ -69,6 +76,7 @@ async function main() {
         const failing = first.ok ? first.meta.checks.filter((c) => c.status !== "pass") : [];
         const fixed = await attempt(() => (first.ok ? revise(session, 1, fixRequest(failing), provider) : generate(session, prompt, provider)));
         row.fixRound = summarize(fixed);
+        if (fixed.ok && GOLDEN[i]) row.goldenAfterFix = matchGolden(fixed.intent, GOLDEN[i]);
         console.log(
           fixed.ok
             ? `    fix:   ERC ${fixed.meta.erc.errors} errors, ${fixed.meta.erc.warnings} warnings, ${row.fixRound.ruleFailures} rule failures`
@@ -92,6 +100,9 @@ async function main() {
     ercCleanAfterFix: rows.filter((r) => ercClean(r.first) || ercClean(r.fixRound)).length,
     ercAndRulesCleanFirst: rows.filter((r) => allClean(r.first)).length,
     ercAndRulesCleanAfterFix: rows.filter((r) => allClean(final(r))).length,
+    goldenFirst: rows.filter((r) => r.golden && r.golden.match !== "mismatch").length,
+    goldenExactFirst: rows.filter((r) => r.golden?.match === "exact").length,
+    goldenAfterFix: rows.filter((r) => { const g = r.goldenAfterFix ?? r.golden; return g && g.match !== "mismatch"; }).length,
     apiErrors: rows.filter((r) => r.error).length,
     rows,
   };
@@ -102,6 +113,8 @@ async function main() {
   console.log(`ERC-clean after one fix round:     ${result.ercCleanAfterFix}/${n}`);
   console.log(`ERC + design rules clean first:    ${result.ercAndRulesCleanFirst}/${n}`);
   console.log(`ERC + design rules clean after fix: ${result.ercAndRulesCleanAfterFix}/${n}`);
+  console.log(`matches the golden answer first:   ${result.goldenFirst}/${n} (${result.goldenExactFirst} exact, the rest with extra parts)`);
+  console.log(`matches the golden answer after fix: ${result.goldenAfterFix}/${n}`);
   console.log(`prompts lost to API errors:        ${result.apiErrors}/${n}`);
   console.log(`written: data/eval-results.json`);
 }
